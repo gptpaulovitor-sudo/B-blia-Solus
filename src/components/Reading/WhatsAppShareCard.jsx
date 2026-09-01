@@ -175,7 +175,7 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
         </cite>
       </section>
 
-      {/* CORPO DO CARTÃO: Saudação Oficial do App ou Anotação Concisa */}
+      {/* CORPO DO CARTÃO: Saudação Oficial do App */}
       <section
         style={{
           width: '100%',
@@ -183,134 +183,66 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
           backgroundColor: '#FFFFFF',
           borderRadius: '24px',
           border: '1px solid rgba(122, 21, 28, 0.15)',
-          padding: '24px 32px',
+          padding: '28px 36px',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center',
-          gap: '10px',
+          gap: '12px',
           boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
         }}
       >
-        {notaUsuario && notaUsuario.trim().length > 0 && notaUsuario.trim().length <= 180 ? (
-          // Caso a anotação seja curta: cabe por inteiro no cartão com elegância
-          <>
-            <div
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '12px',
-                fontWeight: '700',
-                letterSpacing: '1.5px',
-                color: '#7A151C',
-                textTransform: 'uppercase',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <span>✍️ MINHA ANOTAÇÃO DO ESTUDO</span>
-            </div>
+        <div
+          style={{
+            fontFamily: "'Cinzel', serif",
+            fontSize: '14px',
+            fontWeight: '800',
+            letterSpacing: '2.5px',
+            color: '#7A151C',
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <span>🕊️ SOLUS CHRISTUS • ESTUDO & MEDITAÇÃO DIÁRIA</span>
+        </div>
 
-            <div
-              style={{
-                fontFamily: "'Crimson Pro', serif",
-                fontStyle: 'italic',
-                fontSize: '25px',
-                lineHeight: 1.45,
-                color: '#232323'
-              }}
-            >
-              "{notaUsuario.trim()}"
-            </div>
-          </>
-        ) : notaUsuario && notaUsuario.trim().length > 180 ? (
-          // Caso a anotação seja longa: Saudação Oficial com indicação de leitura no texto da mensagem
-          <>
-            <div
-              style={{
-                fontFamily: "'Cinzel', serif",
-                fontSize: '13px',
-                fontWeight: '800',
-                letterSpacing: '2px',
-                color: '#7A151C',
-                textTransform: 'uppercase',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <span>📖 ESTUDO & MEDITAÇÃO DIÁRIA</span>
-            </div>
+        <div
+          style={{
+            fontFamily: "'Crimson Pro', serif",
+            fontStyle: 'italic',
+            fontSize: '25px',
+            lineHeight: 1.4,
+            color: '#374151'
+          }}
+        >
+          “A tua palavra é lâmpada que guia os meus passos e luz no meu caminho.”
+          <span style={{ fontSize: '16px', fontStyle: 'normal', color: '#6B7280', display: 'block', marginTop: '4px', fontWeight: '600' }}>
+            — Salmos 119:105
+          </span>
+        </div>
 
-            <div
-              style={{
-                fontFamily: "'Crimson Pro', serif",
-                fontStyle: 'italic',
-                fontSize: '23px',
-                lineHeight: 1.4,
-                color: '#374151'
-              }}
-            >
-              “A tua palavra é lâmpada que guia os meus passos e luz no meu caminho.”
-              <span style={{ fontSize: '15px', fontStyle: 'normal', color: '#6B7280', display: 'block', marginTop: '4px', fontWeight: '600' }}>
-                — Salmos 119:105
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                backgroundColor: '#7A151C',
-                color: '#FFFFFF',
-                padding: '8px 22px',
-                borderRadius: '999px',
-                fontSize: '14px',
-                fontWeight: '700',
-                letterSpacing: '0.5px',
-                marginTop: '4px',
-                boxShadow: '0 2px 8px rgba(122, 21, 28, 0.25)'
-              }}
-            >
-              <span>✍️ Anotação e Estudo Completo no Texto da Mensagem 👇</span>
-            </div>
-          </>
-        ) : (
-          // Sem anotação: Saudação Institucional Padrão do App
-          <>
-            <div
-              style={{
-                fontFamily: "'Cinzel', serif",
-                fontSize: '13px',
-                fontWeight: '800',
-                letterSpacing: '2px',
-                color: '#7A151C',
-                textTransform: 'uppercase',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <span>🕊️ SOLUS CHRISTUS • EDIFICAÇÃO NA PALAVRA</span>
-            </div>
-
-            <div
-              style={{
-                fontFamily: "'Crimson Pro', serif",
-                fontStyle: 'italic',
-                fontSize: '24px',
-                lineHeight: 1.4,
-                color: '#374151'
-              }}
-            >
-              “Que a palavra de Cristo habite ricamente em vós em toda a sabedoria.”
-              <span style={{ fontSize: '15px', fontStyle: 'normal', color: '#6B7280', display: 'block', marginTop: '4px', fontWeight: '600' }}>
-                — Colossenses 3:16
-              </span>
-            </div>
-          </>
+        {notaUsuario && notaUsuario.trim().length > 0 && (
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#7A151C',
+              color: '#FFFFFF',
+              padding: '8px 24px',
+              borderRadius: '999px',
+              fontSize: '14px',
+              fontWeight: '700',
+              letterSpacing: '0.5px',
+              marginTop: '4px',
+              boxShadow: '0 2px 8px rgba(122, 21, 28, 0.25)'
+            }}
+          >
+            <span>✍️ Estudo e Anotação Pessoal completos no texto da mensagem 👇</span>
+          </div>
         )}
       </section>
 
