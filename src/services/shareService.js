@@ -60,53 +60,90 @@ export async function handleShareWhatsApp({
 }) {
   const versiculoTexto = typeof versiculoDoDia === 'object' ? (versiculoDoDia.texto || '') : String(versiculoDoDia || '');
   const versiculoRef = typeof versiculoDoDia === 'object' ? (versiculoDoDia.referencia || '') : '';
+  const notaLimpa = (notaUsuario || '').trim();
 
+  // 1. Montar texto completo da mensagem para o WhatsApp com quebras de linha e destaques
+  let textoCompartilhamento = `*SOLUS CHRISTUS • Estudo Diário*\n\n"${versiculoTexto}"\n— *${versiculoRef}*`;
+  
+  if (notaLimpa) {
+    textoCompartilhamento += `\n\n✍️ *Minha Anotação / Estudo:*\n${notaLimpa}`;
+  }
+  
+  textoCompartilhamento += `\n\n🕊️ _Estudo diário no aplicativo Solus Christus_`;
+
+  // 2. Copiar o texto do estudo para a área de transferência como segurança
+  if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(textoCompartilhamento);
+    } catch (clipErr) {
+      console.warn('Clipboard write error:', clipErr);
+    }
+  }
+
+  // 3. Renderizar e baixar a imagem oficial de Saudação & Versículo (1080x1080)
+  if (cardElement) {
+    try {
+      const blob = await renderCardToBlob(cardElement);
+      const dataIso = new Date().toISOString().split('T')[0];
+      const fileName = `solus-christus-saudacao-${dataIso}.png`;
+
+      const fileUrl = URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileUrl;
+      downloadLink.download = fileName;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      setTimeout(() => {
+        URL.revokeObjectURL(fileUrl);
+      }, 10000);
+    } catch (cardErr) {
+      console.warn('Aviso na renderização do cartão:', cardErr);
+    }
+  }
+
+  // 4. Abrir o WhatsApp diretamente com o texto completo já inserido na mensagem
+  // api.whatsapp.com/send?text= abre o app do WhatsApp no celular ou web no PC com 100% do texto digitado
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartilhamento)}`;
+  window.open(waUrl, '_blank');
+
+  if (showToast) {
+    showToast('Estudo e anotação enviados para o WhatsApp! Cartão salvo na sua galeria.');
+  }
+
+  return { success: true, method: 'whatsapp-direct-message' };
+}
+
+/**
+ * Função para compartilhar especificamente o arquivo de imagem (1080x1080)
+ * Ideal para postar no Status do WhatsApp, Stories ou Instagram
+ */
+export async function handleShareCardImageOnly({
+  cardElement,
+  showToast
+}) {
   try {
-    // 1. Gera o blob da imagem em alta resolução
     const blob = await renderCardToBlob(cardElement);
     const dataIso = new Date().toISOString().split('T')[0];
-    const fileName = `solus-christus-estudo-${dataIso}.png`;
+    const fileName = `solus-christus-saudacao-${dataIso}.png`;
     const imageFile = new File([blob], fileName, { type: 'image/png' });
 
-    // Formatar texto completo para o WhatsApp (com o versículo e toda a reflexão do usuário)
-    const notaLimpa = (notaUsuario || '').trim();
-    let textoCompartilhamento = `*SOLUS CHRISTUS • Estudo Diário*\n\n"${versiculoTexto}"\n— *${versiculoRef}*`;
-    
-    if (notaLimpa) {
-      textoCompartilhamento += `\n\n✍️ *Minha Anotação / Estudo:*\n${notaLimpa}`;
-    }
-    
-    textoCompartilhamento += `\n\n🕊️ _Estudo diário no aplicativo Solus Christus_`;
-
-    // 2. Tentar Web Share API nativa com suporte a arquivos (mobile Android/iOS)
-    const canShareFiles = typeof navigator !== 'undefined' &&
-                          typeof navigator.share === 'function' &&
-                          typeof navigator.canShare === 'function' &&
-                          navigator.canShare({ files: [imageFile] });
-
-    if (canShareFiles) {
-      try {
-        await navigator.share({
-          files: [imageFile],
-          title: 'Estudo Diário • Solus Christus',
-          text: textoCompartilhamento
-        });
-
-        if (showToast) {
-          showToast('Estudo compartilhado com sucesso no WhatsApp!');
-        }
-
-        return { success: true, method: 'web-share-files' };
-      } catch (shareErr) {
-        // Se o usuário simplesmente cancelou o menu nativo, não forçar fallback
-        if (shareErr.name === 'AbortError') {
-          return { success: false, aborted: true };
-        }
-        console.warn('Web Share API falhou, aplicando fallback:', shareErr);
-      }
+    if (
+      typeof navigator !== 'undefined' &&
+      typeof navigator.share === 'function' &&
+      typeof navigator.canShare === 'function' &&
+      navigator.canShare({ files: [imageFile] })
+    ) {
+      await navigator.share({
+        files: [imageFile],
+        title: 'Solus Christus • Saudação do Dia'
+      });
+      if (showToast) showToast('Imagem do cartão compartilhada!');
+      return { success: true };
     }
 
-    // 3. FALLBACK: Baixar a imagem automaticamente para o celular/PC e abrir wa.me
+    // Fallback: download da imagem
     const fileUrl = URL.createObjectURL(blob);
     const downloadLink = document.createElement('a');
     downloadLink.href = fileUrl;
@@ -114,31 +151,14 @@ export async function handleShareWhatsApp({
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
+    setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
 
-    setTimeout(() => {
-      URL.revokeObjectURL(fileUrl);
-    }, 10000);
-
-    // Formatar texto para o link web do WhatsApp (com aviso sobre a imagem)
-    let textoMensagemWhatsApp = `*SOLUS CHRISTUS • Estudo Diário*\n\n"${versiculoTexto}"\n— *${versiculoRef}*`;
-    if (notaLimpa) {
-      textoMensagemWhatsApp += `\n\n✍️ *Minha Anotação / Estudo:*\n${notaLimpa}`;
+    if (showToast) showToast('Cartão de imagem salvo no seu dispositivo!');
+    return { success: true };
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Erro ao compartilhar imagem:', err);
     }
-    textoMensagemWhatsApp += `\n\n📲 _(O cartão de saudação e versículo foi salvo no seu aparelho. Anexe a foto nesta conversa!)_`;
-
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(textoMensagemWhatsApp)}`;
-    window.open(waUrl, '_blank');
-
-    if (showToast) {
-      showToast('Cartão salvo! Cole o texto e envie a foto no WhatsApp.');
-    }
-
-    return { success: true, method: 'fallback-download-wa' };
-  } catch (error) {
-    console.error('Erro na execução de handleShareWhatsApp:', error);
-    if (showToast) {
-      showToast('Erro ao processar o compartilhamento do cartão.');
-    }
-    throw error;
+    return { success: false };
   }
 }
