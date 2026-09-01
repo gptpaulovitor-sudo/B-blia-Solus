@@ -305,6 +305,56 @@ export function AppProvider({ children }) {
     setSelectedVerseModal(null);
   };
 
+  // Salvar / atualizar anotação ou cor para uma lista de múltiplos versículos juntos
+  const salvarMultiplosVersiculosMarcados = ({ livroId, capitulo, versiculos = [], cor, nota }) => {
+    const capNum = Number(capitulo);
+    const dataAtual = new Date().toISOString();
+    let atualizados = [...versiculosMarcados];
+
+    versiculos.forEach(ver => {
+      const verNum = Number(ver);
+      const id = `v_${livroId}_${capNum}_${verNum}`;
+      const index = atualizados.findIndex(
+        v => v.id === id || (v.livroId === livroId && Number(v.capitulo) === capNum && Number(v.versiculo) === verNum)
+      );
+
+      if (index >= 0) {
+        if (!cor && (!nota || nota.trim() === '')) {
+          atualizados.splice(index, 1);
+        } else {
+          atualizados[index] = {
+            ...atualizados[index],
+            id,
+            livroId,
+            capitulo: capNum,
+            versiculo: verNum,
+            cor: cor !== undefined ? cor : atualizados[index].cor,
+            nota: nota !== undefined ? nota : atualizados[index].nota,
+            data: dataAtual
+          };
+        }
+      } else {
+        if (cor || (nota && nota.trim() !== '')) {
+          atualizados.push({
+            id,
+            livroId,
+            capitulo: capNum,
+            versiculo: verNum,
+            cor: cor || null,
+            nota: nota || '',
+            data: dataAtual
+          });
+        }
+      }
+    });
+
+    setVersiculosMarcados(atualizados);
+    storageService.saveVersiculosMarcados(atualizados);
+    registrarAtividadeHoje();
+    showToast(`Anotação salva para ${versiculos.length} versículo(s)!`);
+    setSelectedVerseModal(null);
+  };
+
   // Remover marcação/anotação de um versículo
   const removerVersiculoMarcado = (livroId, capitulo, versiculo) => {
     const capNum = Number(capitulo);
@@ -445,6 +495,7 @@ export function AppProvider({ children }) {
         marcarLivrosComoLidos,
         versiculosMarcados,
         salvarVersiculoMarcado,
+        salvarMultiplosVersiculosMarcados,
         removerVersiculoMarcado,
         planoAtivo,
         ativarPlano,

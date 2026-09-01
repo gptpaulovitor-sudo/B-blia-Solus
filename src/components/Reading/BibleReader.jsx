@@ -29,14 +29,20 @@ export default function BibleReader() {
     planoAtivo,
     registrarAtividadeHoje,
     salvarVersiculoMarcado,
+    salvarMultiplosVersiculosMarcados,
     showToast
   } = useApp();
 
   const cardRef = React.useRef(null);
-  const [versiculoBaseNum, setVersiculoBaseNum] = React.useState(1);
+  const [versiculoInicioNum, setVersiculoInicioNum] = React.useState(1);
+  const [versiculoFimNum, setVersiculoFimNum] = React.useState(1);
   const [notaUsuario, setNotaUsuario] = React.useState('');
   const [isSharing, setIsSharing] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+
+  // Modo Seleção Múltipla direto no texto bíblico
+  const [modoSelecaoMultipla, setModoSelecaoMultipla] = React.useState(false);
+  const [versiculosSelecionadosSet, setVersiculosSelecionadosSet] = React.useState([]);
 
   // Carregar anotação existente ao mudar de livro ou capítulo
   React.useEffect(() => {
@@ -45,31 +51,66 @@ export default function BibleReader() {
     );
 
     if (notaExistente) {
-      setVersiculoBaseNum(Number(notaExistente.versiculo));
+      setVersiculoInicioNum(Number(notaExistente.versiculo));
+      setVersiculoFimNum(Number(notaExistente.versiculo));
       setNotaUsuario(notaExistente.nota);
     } else {
-      setVersiculoBaseNum(1);
+      setVersiculoInicioNum(1);
+      setVersiculoFimNum(1);
       setNotaUsuario('');
     }
+    setVersiculosSelecionadosSet([]);
   }, [posicao.livroId, posicao.capitulo]);
 
-  const versiculoBaseObj = React.useMemo(() => {
-    return versiculosAtuais.find(v => Number(v.v) === Number(versiculoBaseNum)) || versiculosAtuais[0] || { v: 1, t: '' };
-  }, [versiculosAtuais, versiculoBaseNum]);
+  const numInicioEstudo = Math.min(versiculoInicioNum, versiculoFimNum);
+  const numFimEstudo = Math.max(versiculoInicioNum, versiculoFimNum);
 
-  const referenciaCompleta = `${livroAtual.nome} ${posicao.capitulo}:${versiculoBaseObj.v}`;
+  const versiculosEstudo = React.useMemo(() => {
+    return versiculosAtuais.filter(v => {
+      const n = Number(v.v);
+      return n >= numInicioEstudo && n <= numFimEstudo;
+    });
+  }, [versiculosAtuais, numInicioEstudo, numFimEstudo]);
+
+  const textoEstudoCompleto = React.useMemo(() => {
+    if (versiculosEstudo.length === 0) return '';
+    if (versiculosEstudo.length === 1) return versiculosEstudo[0].t;
+    return versiculosEstudo.map(v => `(${v.v}) ${v.t}`).join(' ');
+  }, [versiculosEstudo]);
+
+  const referenciaEstudoCompleta = React.useMemo(() => {
+    if (numInicioEstudo === numFimEstudo) {
+      return `${livroAtual.nome} ${posicao.capitulo}:${numInicioEstudo}`;
+    }
+    return `${livroAtual.nome} ${posicao.capitulo}:${numInicioEstudo}-${numFimEstudo}`;
+  }, [livroAtual.nome, posicao.capitulo, numInicioEstudo, numFimEstudo]);
+
+  const listaVersiculosEstudo = React.useMemo(() => {
+    const arr = [];
+    for (let i = numInicioEstudo; i <= numFimEstudo; i++) {
+      arr.push(i);
+    }
+    return arr;
+  }, [numInicioEstudo, numFimEstudo]);
 
   const onCompartilharWhatsApp = () => {
-    // Salva anotação no progresso pessoal e ativa ofensiva
     registrarAtividadeHoje();
-    salvarVersiculoMarcado({
-      livroId: posicao.livroId,
-      capitulo: posicao.capitulo,
-      versiculo: versiculoBaseObj.v,
-      nota: notaUsuario
-    });
+    if (salvarMultiplosVersiculosMarcados) {
+      salvarMultiplosVersiculosMarcados({
+        livroId: posicao.livroId,
+        capitulo: posicao.capitulo,
+        versiculos: listaVersiculosEstudo,
+        nota: notaUsuario
+      });
+    } else {
+      salvarVersiculoMarcado({
+        livroId: posicao.livroId,
+        capitulo: posicao.capitulo,
+        versiculo: numInicioEstudo,
+        nota: notaUsuario
+      });
+    }
 
-    // Abre o Modal com o Cartão renderizado, botão de WhatsApp e botão de baixar imagem
     setIsShareModalOpen(true);
   };
 
@@ -161,44 +202,77 @@ export default function BibleReader() {
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <button
+            onClick={() => {
+              setModoSelecaoMultipla(prev => !prev);
+              if (modoSelecaoMultipla) setVersiculosSelecionadosSet([]);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+              modoSelecaoMultipla
+                ? 'bg-amber-600 text-white border-amber-600 shadow-md ring-2 ring-amber-600/30'
+                : 'bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#7A151C] dark:text-[#EAE6DF] border-[#E4E4E7] dark:border-[#27272A]'
+            }`}
+            title="Selecionar múltiplos versículos juntos para uma anotação"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {modoSelecaoMultipla ? 'Selecionando...' : 'Selecionar Vários'}
+            </span>
+          </button>
+
           <button
             onClick={() => {
               const sec = document.getElementById('secao-estudo-whatsapp');
               if (sec) sec.scrollIntoView({ behavior: 'smooth' });
             }}
-            class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#7A151C] dark:text-[#EAE6DF] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#7A151C] dark:text-[#EAE6DF] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold transition-colors cursor-pointer"
             title="Ir para Anotações e Compartilhar no WhatsApp"
           >
-            <NotebookPen class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
-            <span class="hidden sm:inline">Anotar & WhatsApp</span>
+            <NotebookPen className="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
+            <span className="hidden sm:inline">Anotar & WhatsApp</span>
           </button>
 
           <button
             onClick={() => toggleCapituloLido(posicao.livroId, posicao.capitulo)}
-            class={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${isCapLido
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${isCapLido
                 ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/30'
                 : 'bg-[#7A151C] dark:bg-[#8B1C24] hover:bg-[#681117] dark:hover:bg-[#7A151C] text-white shadow-md'
               }`}
           >
-            <CheckCircle2 class="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4" />
             <span>{isCapLido ? 'Capítulo Lido' : 'Concluir Capítulo'}</span>
           </button>
 
           <button
             onClick={handleProximoCapitulo}
-            class="p-2.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#232323] dark:text-[#EAE6DF] border border-[#E4E4E7] dark:border-[#27272A] transition-colors"
+            className="p-2.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#232323] dark:text-[#EAE6DF] border border-[#E4E4E7] dark:border-[#27272A] transition-colors"
             title={proximoCapituloDoPlano ? `Próximo do Plano: ${proximoCapituloDoPlano.livroNome} ${proximoCapituloDoPlano.capitulo}` : "Próximo Capítulo"}
           >
-            <ChevronRight class="w-4 h-4" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Main Continuous Bible Reading Card */}
-      <main aria-label="Texto Bíblico Versão ACF" class="bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 md:p-10 border border-[#E4E4E7] dark:border-[#27272A] shadow-lg">
+      <main aria-label="Texto Bíblico Versão ACF" className="bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 md:p-10 border border-[#E4E4E7] dark:border-[#27272A] shadow-lg">
+        {modoSelecaoMultipla && (
+          <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs font-semibold text-amber-900 dark:text-amber-200 animate-fadeIn">
+            <span>✨ Modo Seleção Múltipla ativo: toque nos versículos para agrupá-los para um estudo.</span>
+            <button
+              onClick={() => {
+                setModoSelecaoMultipla(false);
+                setVersiculosSelecionadosSet([]);
+              }}
+              className="text-xs font-bold text-[#7A151C] dark:text-amber-400 underline ml-2 cursor-pointer"
+            >
+              Concluir
+            </button>
+          </div>
+        )}
+
         <div
-          class="space-y-5 text-[#232323] dark:text-[#EAE6DF]"
+          className="space-y-5 text-[#232323] dark:text-[#EAE6DF]"
           style={{ fontFamily: 'var(--font-leitura)', fontSize: `${settings.fontSize}px`, lineHeight: 1.85 }}
         >
           {versiculosAtuais.map((item) => {
@@ -206,23 +280,38 @@ export default function BibleReader() {
             const marcacao = versiculosMarcados.find(v => v.id === idVersiculo || (v.livroId === posicao.livroId && Number(v.capitulo) === Number(posicao.capitulo) && Number(v.versiculo) === Number(item.v)));
             const highlightClass = marcacao?.cor ? `highlight-${marcacao.cor}` : '';
             const temNota = !!marcacao?.nota;
+            const numV = Number(item.v);
+            const isSelectedInMulti = versiculosSelecionadosSet.includes(numV);
+            const multiClass = isSelectedInMulti ? 'ring-2 ring-amber-500 bg-amber-100/90 dark:bg-amber-900/60 font-semibold shadow-xs' : '';
 
             return (
-              <div key={item.v} class="group relative inline">
+              <div key={item.v} className="group relative inline">
                 <span
-                  onClick={() => setSelectedVerseModal({
-                    livroId: posicao.livroId,
-                    capitulo: posicao.capitulo,
-                    versiculo: item.v,
-                    texto: item.t
-                  })}
-                  class={`
+                  onClick={() => {
+                    if (modoSelecaoMultipla) {
+                      setVersiculosSelecionadosSet(prev => {
+                        if (prev.includes(numV)) {
+                          return prev.filter(n => n !== numV);
+                        } else {
+                          return [...prev, numV].sort((a, b) => a - b);
+                        }
+                      });
+                    } else {
+                      setSelectedVerseModal({
+                        livroId: posicao.livroId,
+                        capitulo: posicao.capitulo,
+                        versiculo: item.v,
+                        texto: item.t
+                      });
+                    }
+                  }}
+                  className={`
                     inline rounded-md px-1.5 py-0.5 cursor-pointer transition-all duration-150 hover:bg-amber-100/70 dark:hover:bg-amber-900/40 text-stone-900 dark:text-zinc-100
-                    ${highlightClass}
+                    ${highlightClass} ${multiClass}
                   `}
                 >
                   {/* Verse Number Indicator */}
-                  <sup class="font-sans text-[12px] font-black text-amber-600 dark:text-amber-400 mr-1.5 select-none">
+                  <sup className="font-sans text-[12px] font-black text-amber-600 dark:text-amber-400 mr-1.5 select-none">
                     {item.v}
                   </sup>
 
@@ -230,8 +319,8 @@ export default function BibleReader() {
 
                   {/* Personal Note Indicator */}
                   {temNota && (
-                    <span title={`Nota: ${marcacao.nota}`} class="inline-flex items-center ml-1 text-red-600 dark:text-red-400">
-                      <NotebookPen class="w-3.5 h-3.5 inline" />
+                    <span title={`Nota: ${marcacao.nota}`} className="inline-flex items-center ml-1 text-red-600 dark:text-red-400">
+                      <NotebookPen className="w-3.5 h-3.5 inline" />
                     </span>
                   )}
                 </span>
@@ -282,31 +371,50 @@ export default function BibleReader() {
             </h2>
           </div>
 
-          {/* Seletor de Versículo Base do Capítulo */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="versiculo-base-select" className="text-xs font-bold text-[#52525B] dark:text-[#A1A1AA] uppercase tracking-wider">
-              Versículo Base:
+          {/* Seletor de Versículos do Estudo (De ... Até ...) */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-xs font-bold text-[#52525B] dark:text-[#A1A1AA] uppercase tracking-wider">
+              Versículos do Estudo:
             </label>
-            <select
-              id="versiculo-base-select"
-              value={versiculoBaseNum}
-              onChange={(e) => setVersiculoBaseNum(Number(e.target.value))}
-              className="px-3 py-1.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold text-[#7A151C] dark:text-[#8B1C24] focus:outline-none focus:ring-2 focus:ring-[#7A151C]"
-            >
-              {versiculosAtuais.map((item) => (
-                <option key={item.v} value={item.v}>
-                  {livroAtual.nome} {posicao.capitulo}:{item.v}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#232323] dark:text-[#EAE6DF]">
+              <span>Do</span>
+              <select
+                id="versiculo-inicio-select"
+                value={numInicioEstudo}
+                onChange={(e) => setVersiculoInicioNum(Number(e.target.value))}
+                className="px-2.5 py-1.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold text-[#7A151C] dark:text-[#8B1C24] focus:outline-none focus:ring-2 focus:ring-[#7A151C]"
+              >
+                {versiculosAtuais.map((item) => (
+                  <option key={item.v} value={item.v}>
+                    v. {item.v}
+                  </option>
+                ))}
+              </select>
+              <span>até o</span>
+              <select
+                id="versiculo-fim-select"
+                value={numFimEstudo}
+                onChange={(e) => setVersiculoFimNum(Number(e.target.value))}
+                className="px-2.5 py-1.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold text-[#7A151C] dark:text-[#8B1C24] focus:outline-none focus:ring-2 focus:ring-[#7A151C]"
+              >
+                {versiculosAtuais.map((item) => (
+                  <option key={item.v} value={item.v}>
+                    v. {item.v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24]">
+              {listaVersiculosEstudo.length} {listaVersiculosEstudo.length > 1 ? 'versículos' : 'versículo'}
+            </span>
           </div>
         </div>
 
-        {/* Citação do Versículo Base Escolhido */}
-        <blockquote className="p-3.5 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border-l-4 border-[#7A151C] dark:border-[#8B1C24] text-xs md:text-sm font-crimson italic text-[#232323] dark:text-[#EAE6DF]">
-          "{versiculoBaseObj.t}"
+        {/* Citação dos Versículos Escolhidos */}
+        <blockquote className="p-3.5 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border-l-4 border-[#7A151C] dark:border-[#8B1C24] text-xs md:text-sm font-crimson italic text-[#232323] dark:text-[#EAE6DF] max-h-36 overflow-y-auto">
+          "{textoEstudoCompleto}"
           <span className="block mt-1 font-sans font-bold text-[#7A151C] dark:text-[#8B1C24] not-italic text-[11px]">
-            — {referenciaCompleta} (ACF)
+            — {referenciaEstudoCompleta} (ACF)
           </span>
         </blockquote>
 
@@ -350,6 +458,50 @@ export default function BibleReader() {
         </div>
       </section>
 
+      {/* Barra Flutuante de Ação para Seleção Múltipla */}
+      {modoSelecaoMultipla && versiculosSelecionadosSet.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#FFFFFF] dark:bg-[#1C1C1E] border-2 border-[#7A151C] shadow-2xl rounded-2xl px-5 py-3.5 flex items-center gap-4 animate-fadeIn">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">
+              {versiculosSelecionadosSet.length} {versiculosSelecionadosSet.length > 1 ? 'versículos selecionados' : 'versículo selecionado'}
+            </span>
+            <span className="text-[11px] text-stone-600 dark:text-stone-300 font-semibold">
+              {livroAtual.nome} {posicao.capitulo}:{Math.min(...versiculosSelecionadosSet)}{versiculosSelecionadosSet.length > 1 ? `-${Math.max(...versiculosSelecionadosSet)}` : ''}
+            </span>
+          </div>
+
+          <button
+            onClick={() => {
+              const minV = Math.min(...versiculosSelecionadosSet);
+              const maxV = Math.max(...versiculosSelecionadosSet);
+              const versesSelected = versiculosAtuais.filter(v => versiculosSelecionadosSet.includes(Number(v.v)));
+              const txt = versesSelected.map(v => `(${v.v}) ${v.t}`).join(' ');
+
+              setSelectedVerseModal({
+                livroId: posicao.livroId,
+                capitulo: posicao.capitulo,
+                versiculo: minV,
+                versiculoFim: maxV,
+                texto: txt
+              });
+              setModoSelecaoMultipla(false);
+              setVersiculosSelecionadosSet([]);
+            }}
+            className="px-4 py-2 rounded-xl bg-[#7A151C] hover:bg-[#681117] text-white text-xs font-bold shadow-md cursor-pointer transition-transform active:scale-95 flex items-center gap-1.5"
+          >
+            <NotebookPen className="w-3.5 h-3.5" />
+            <span>Anotar Versículos</span>
+          </button>
+
+          <button
+            onClick={() => setVersiculosSelecionadosSet([])}
+            className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-semibold px-2 py-1 cursor-pointer"
+          >
+            Limpar
+          </button>
+        </div>
+      )}
+
       {/* Cartão Padrão Oculto para Renderização de Imagem 1080x1080px */}
       <div
         style={{
@@ -365,8 +517,8 @@ export default function BibleReader() {
       >
         <WhatsAppShareCard
           ref={cardRef}
-          versiculoTexto={versiculoBaseObj.t}
-          referencia={referenciaCompleta}
+          versiculoTexto={textoEstudoCompleto}
+          referencia={referenciaEstudoCompleta}
           notaUsuario={notaUsuario}
         />
       </div>
@@ -379,8 +531,8 @@ export default function BibleReader() {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         cardRef={cardRef}
-        versiculoTexto={versiculoBaseObj.t}
-        referencia={referenciaCompleta}
+        versiculoTexto={textoEstudoCompleto}
+        referencia={referenciaEstudoCompleta}
         notaUsuario={notaUsuario}
         showToast={showToast}
       />

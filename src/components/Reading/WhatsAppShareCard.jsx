@@ -142,13 +142,16 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
             border: '1px solid rgba(122, 21, 28, 0.2)'
           }}
         >
-          VERSÍCULO BASE DO DIA
+          {referencia && referencia.includes('-') ? 'VERSÍCULOS BASE DO ESTUDO' : 'VERSÍCULO BASE DO DIA'}
         </div>
 
         <blockquote
           style={{
             fontFamily: "'Cinzel', serif",
-            fontSize: (versiculoTexto && versiculoTexto.length > 200) ? '30px' : (versiculoTexto && versiculoTexto.length > 120) ? '34px' : '38px',
+            fontSize: (!versiculoTexto) ? '36px' :
+              versiculoTexto.length > 350 ? '22px' :
+              versiculoTexto.length > 220 ? '26px' :
+              versiculoTexto.length > 130 ? '32px' : '38px',
             fontWeight: '700',
             lineHeight: 1.45,
             color: '#7A151C',
