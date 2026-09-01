@@ -174,7 +174,19 @@ export default function BibleReader() {
           </div>
         </div>
 
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const sec = document.getElementById('secao-estudo-whatsapp');
+              if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+            }}
+            class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#7A151C] dark:text-[#EAE6DF] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold transition-colors cursor-pointer"
+            title="Ir para Anotações e Compartilhar no WhatsApp"
+          >
+            <NotebookPen class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
+            <span class="hidden sm:inline">Anotar & WhatsApp</span>
+          </button>
+
           <button
             onClick={() => toggleCapituloLido(posicao.livroId, posicao.capitulo)}
             class={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${isCapLido
@@ -191,7 +203,7 @@ export default function BibleReader() {
             class="p-2.5 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] hover:bg-stone-200 dark:hover:bg-stone-800 text-[#232323] dark:text-[#EAE6DF] border border-[#E4E4E7] dark:border-[#27272A] transition-colors"
             title={proximoCapituloDoPlano ? `Próximo do Plano: ${proximoCapituloDoPlano.livroNome} ${proximoCapituloDoPlano.capitulo}` : "Próximo Capítulo"}
           >
-            <ChevronRight class="w-5 h-5" />
+            <ChevronRight class="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -268,8 +280,9 @@ export default function BibleReader() {
 
       {/* SEÇÃO DE ANOTAÇÕES DO ESTUDO DIÁRIO & COMPARTILHAMENTO */}
       <section
+        id="secao-estudo-whatsapp"
         aria-label="Anotações do Estudo Diário"
-        className="bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 md:p-8 border border-[#E4E4E7] dark:border-[#27272A] shadow-lg space-y-5"
+        className="bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 md:p-8 border border-[#E4E4E7] dark:border-[#27272A] shadow-lg space-y-5 scroll-mt-20"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E4E4E7] dark:border-[#27272A]">
           <div className="space-y-1">
