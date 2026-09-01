@@ -1,5 +1,5 @@
 // Solus Christus PWA Service Worker
-const CACHE_NAME = 'solus-christus-v2';
+const CACHE_NAME = 'solus-christus-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
