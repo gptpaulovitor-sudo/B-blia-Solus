@@ -20,6 +20,29 @@ import {
   BarChart3
 } from 'lucide-react';
 
+/**
+ * Formata um conjunto de números de versículos em intervalos elegantes (ex: 1-4 ou 1-2, 5)
+ */
+function formatarIntervalosVersiculos(numeros = []) {
+  if (!numeros || numeros.length === 0) return '';
+  const sorted = [...numeros].map(Number).sort((a, b) => a - b);
+  const ranges = [];
+  let start = sorted[0];
+  let prev = sorted[0];
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === prev + 1) {
+      prev = sorted[i];
+    } else {
+      ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+      start = sorted[i];
+      prev = sorted[i];
+    }
+  }
+  ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+  return ranges.join(', ');
+}
+
 export default function ProfileView() {
   const { 
     versiculosMarcados, 
@@ -117,7 +140,43 @@ export default function ProfileView() {
     };
   }
 
-  const marcacoesFiltradas = (versiculosMarcados || []).filter(v => {
+  // Unificar versículos que compartilham a mesma anotação e contexto de capítulo
+  const marcacoesUnificadas = React.useMemo(() => {
+    const lista = versiculosMarcados || [];
+    const grupos = new Map();
+
+    lista.forEach(item => {
+      const notaLimpa = (item.nota || '').trim();
+      // Agrupa se tiver anotação idêntica no mesmo livro e capítulo
+      const chave = notaLimpa
+        ? `${item.livroId}_${item.capitulo}_nota_${notaLimpa}`
+        : `${item.livroId}_${item.capitulo}_v_${item.versiculo}_${item.cor || ''}`;
+
+      if (!grupos.has(chave)) {
+        grupos.set(chave, {
+          id: item.id || `grupo_${item.livroId}_${item.capitulo}_${item.versiculo}`,
+          livroId: item.livroId,
+          capitulo: Number(item.capitulo),
+          versiculos: [Number(item.versiculo)],
+          cor: item.cor || null,
+          nota: item.nota || '',
+          data: item.data || new Date().toISOString()
+        });
+      } else {
+        const grupo = grupos.get(chave);
+        const vNum = Number(item.versiculo);
+        if (!grupo.versiculos.includes(vNum)) {
+          grupo.versiculos.push(vNum);
+          grupo.versiculos.sort((a, b) => a - b);
+        }
+        if (!grupo.cor && item.cor) grupo.cor = item.cor;
+      }
+    });
+
+    return Array.from(grupos.values());
+  }, [versiculosMarcados]);
+
+  const marcacoesFiltradas = marcacoesUnificadas.filter(v => {
     // Filtro por cor/tipo
     if (activeFilterColor === 'notes' && (!v.nota || v.nota.trim() === '')) return false;
     if (activeFilterColor !== 'all' && activeFilterColor !== 'notes' && v.cor !== activeFilterColor) return false;
@@ -553,64 +612,82 @@ export default function ProfileView() {
             </p>
           </div>
         ) : (
-          <div class="space-y-4">
+          <div className="space-y-4">
             {marcacoesFiltradas.map((item) => {
               const livroObj = LIVROS_BIBLIA.find(l => l.id === item.livroId) || { nome: item.livroId };
-              const versiculos = getCapituloVersiculos(item.livroId, item.capitulo);
-              const versiculoObj = versiculos.find(v => Number(v.v) === Number(item.versiculo)) || { t: "Texto bíblico" };
+              const versiculosCap = getCapituloVersiculos(item.livroId, item.capitulo) || [];
+              
+              // Montar texto agrupado de todos os versículos do conjunto
+              const textoCombinado = (item.versiculos || [item.versiculo]).map(numVer => {
+                const vObj = versiculosCap.find(v => Number(v.v) === Number(numVer));
+                const t = vObj ? vObj.t : '';
+                return (item.versiculos && item.versiculos.length > 1) ? `(${numVer}) ${t}` : t;
+              }).filter(Boolean).join(' ');
 
+              const refVersiculos = formatarIntervalosVersiculos(item.versiculos || [item.versiculo]);
+              const referenciaExibicao = `${livroObj.nome} ${item.capitulo}:${refVersiculos}`;
               const highlightBgClass = item.cor ? `highlight-${item.cor}` : '';
 
               return (
                 <div
                   key={item.id}
-                  class="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/40 space-y-3 transition-all hover:border-amber-400"
+                  className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/40 space-y-3 transition-all hover:border-amber-400"
                 >
                   {/* Verse Reference Header */}
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="font-serif font-bold text-sm text-stone-900 dark:text-stone-100">
-                        {livroObj.nome} {item.capitulo}:{item.versiculo}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-serif font-bold text-sm text-stone-900 dark:text-stone-100">
+                        {referenciaExibicao}
                       </span>
+                      {item.versiculos && item.versiculos.length > 1 && (
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#7A151C]/10 text-[#7A151C] dark:bg-[#8B1C24]/20 dark:text-[#8B1C24]">
+                          {item.versiculos.length} versículos unificados
+                        </span>
+                      )}
                       {item.cor && (
-                        <span class={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${highlightBgClass}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${highlightBgClass}`}>
                           {item.cor}
                         </span>
                       )}
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => irParaCapitulo(item.livroId, item.capitulo)}
-                        class="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
+                        className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
                       >
                         <span>Abrir no Texto</span>
-                        <ExternalLink class="w-3.5 h-3.5" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </button>
 
                       <button
-                        onClick={() => removerVersiculoMarcado(item.livroId, item.capitulo, item.versiculo)}
-                        title="Excluir marcação"
-                        class="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors"
+                        onClick={() => {
+                          const versArr = item.versiculos || [item.versiculo];
+                          versArr.forEach(vNum => {
+                            removerVersiculoMarcado(item.livroId, item.capitulo, vNum);
+                          });
+                        }}
+                        title="Excluir marcação/anotação"
+                        className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                       >
-                        <Trash2 class="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
 
                   {/* Verse Text Quote */}
-                  <blockquote class="font-serif italic text-sm text-stone-800 dark:text-stone-200 pl-3 border-l-2 border-amber-500 leading-relaxed">
-                    "{versiculoObj.t}"
+                  <blockquote className="font-serif italic text-sm text-stone-800 dark:text-stone-200 pl-3 border-l-2 border-amber-500 leading-relaxed max-h-36 overflow-y-auto">
+                    "{textoCombinado || 'Texto bíblico'}"
                   </blockquote>
 
                   {/* Personal Note */}
                   {item.nota && item.nota.trim() !== '' && (
-                    <div class="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700/60 text-xs text-stone-700 dark:text-stone-300 font-sans space-y-1">
-                      <div class="font-bold text-[10px] uppercase text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                        <NotebookPen class="w-3 h-3" />
+                    <div className="p-3.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700/60 text-xs text-stone-700 dark:text-stone-300 font-sans space-y-1.5">
+                      <div className="font-bold text-[10px] uppercase text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <NotebookPen className="w-3 h-3" />
                         <span>Minha Anotação Pessoal</span>
                       </div>
-                      <p class="whitespace-pre-line">{item.nota}</p>
+                      <p className="whitespace-pre-line leading-relaxed">{item.nota}</p>
                     </div>
                   )}
                 </div>
