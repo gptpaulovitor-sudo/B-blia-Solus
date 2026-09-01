@@ -75,23 +75,26 @@ export default function ShareModal({
           </button>
         </div>
 
-        {/* Prévia do Cartão */}
-        <div className="p-4 rounded-2xl bg-[#F9F7F1] border border-[#7A151C]/20 text-center space-y-3">
-          <div className="text-[11px] font-bold text-[#7A151C] uppercase tracking-wider">
+        {/* Prévia do Cartão Oficial */}
+        <div className="p-4 rounded-2xl bg-[#7A151C] border border-[#F9F7F1]/30 text-center space-y-2.5 shadow-lg">
+          <div className="text-[10px] font-bold text-[#F9F7F1]/80 uppercase tracking-wider">
             Prévia do Cartão Oficial (1080x1080)
           </div>
-          <div className="border border-[#7A151C] p-4 rounded-xl bg-[#F9F7F1] text-[#232323] space-y-2">
-            <div className="text-xs font-bold text-[#7A151C] uppercase tracking-widest font-cinzel">
+          <div className="border border-[#F9F7F1]/40 p-3.5 rounded-xl bg-[#7A151C] text-[#F9F7F1] space-y-2">
+            <div className="text-xs font-bold text-[#F9F7F1] uppercase tracking-widest font-cinzel">
               SOLUS CHRISTUS
             </div>
-            <div className="font-cinzel font-bold text-sm text-[#7A151C] line-clamp-3 italic">
-              "{versiculoTexto}"
+            <div className="inline-block border border-[#F9F7F1]/70 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#F9F7F1]">
+              VERSÍCULOS BASE DO ESTUDO
             </div>
-            <div className="text-[11px] font-bold text-stone-600">
+            <div className="font-serif text-sm text-[#F9F7F1] line-clamp-3 leading-relaxed">
+              “{versiculoTexto}”
+            </div>
+            <div className="text-[11px] font-bold text-[#F9F7F1]/90">
               — {referencia} (ACF)
             </div>
-            <div className="inline-block bg-[#7A151C] text-white text-[10px] font-bold px-3 py-1 rounded-full mt-1">
-              ✍️ Estudo e Anotação Pessoal completos no texto da mensagem 👇
+            <div className="inline-block bg-[#F9F7F1] text-[#7A151C] text-[10px] font-bold px-3 py-1 rounded-md mt-1">
+              Estudo e Anotações na mensagem
             </div>
           </div>
         </div>

@@ -24,7 +24,7 @@ export async function renderCardToBlob(cardElement) {
     height: 1080,
     scale: 1,
     useCORS: true,
-    backgroundColor: '#F9F7F1',
+    backgroundColor: '#7A151C',
     logging: false
   });
 
