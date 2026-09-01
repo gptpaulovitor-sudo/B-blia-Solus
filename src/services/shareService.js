@@ -68,7 +68,15 @@ export async function handleShareWhatsApp({
     const fileName = `solus-christus-estudo-${dataIso}.png`;
     const imageFile = new File([blob], fileName, { type: 'image/png' });
 
-    const textoCompartilhamento = `Confira meu estudo de hoje no Solus Christus!\n\n"${versiculoTexto}"\n— ${versiculoRef}`;
+    // Formatar texto completo para o WhatsApp (com o versículo e toda a reflexão do usuário)
+    const notaLimpa = (notaUsuario || '').trim();
+    let textoCompartilhamento = `*SOLUS CHRISTUS • Estudo Diário*\n\n"${versiculoTexto}"\n— *${versiculoRef}*`;
+    
+    if (notaLimpa) {
+      textoCompartilhamento += `\n\n✍️ *Minha Anotação / Estudo:*\n${notaLimpa}`;
+    }
+    
+    textoCompartilhamento += `\n\n🕊️ _Estudo diário no aplicativo Solus Christus_`;
 
     // 2. Tentar Web Share API nativa com suporte a arquivos (mobile Android/iOS)
     const canShareFiles = typeof navigator !== 'undefined' &&
@@ -85,7 +93,7 @@ export async function handleShareWhatsApp({
         });
 
         if (showToast) {
-          showToast('Estudo compartilhado com sucesso!');
+          showToast('Estudo compartilhado com sucesso no WhatsApp!');
         }
 
         return { success: true, method: 'web-share-files' };
@@ -98,7 +106,7 @@ export async function handleShareWhatsApp({
       }
     }
 
-    // 3. FALLBACK: Baixar a imagem automaticamente para o celular e abrir wa.me
+    // 3. FALLBACK: Baixar a imagem automaticamente para o celular/PC e abrir wa.me
     const fileUrl = URL.createObjectURL(blob);
     const downloadLink = document.createElement('a');
     downloadLink.href = fileUrl;
@@ -111,15 +119,18 @@ export async function handleShareWhatsApp({
       URL.revokeObjectURL(fileUrl);
     }, 10000);
 
-    // Formatar texto para o link do WhatsApp
-    const notaFormatada = notaUsuario.trim() ? `\n\n*Minha reflexão:*\n_${notaUsuario}_` : '';
-    const textoMensagemWhatsApp = `*SOLUS CHRISTUS • Estudo Diário*\n\n"${versiculoTexto}"\n— *${versiculoRef}*${notaFormatada}\n\n📲 _(O cartão de estudo em imagem foi salvo no seu aparelho. Anexe a foto nesta conversa!)_`;
+    // Formatar texto para o link web do WhatsApp (com aviso sobre a imagem)
+    let textoMensagemWhatsApp = `*SOLUS CHRISTUS • Estudo Diário*\n\n"${versiculoTexto}"\n— *${versiculoRef}*`;
+    if (notaLimpa) {
+      textoMensagemWhatsApp += `\n\n✍️ *Minha Anotação / Estudo:*\n${notaLimpa}`;
+    }
+    textoMensagemWhatsApp += `\n\n📲 _(O cartão de saudação e versículo foi salvo no seu aparelho. Anexe a foto nesta conversa!)_`;
 
     const waUrl = `https://wa.me/?text=${encodeURIComponent(textoMensagemWhatsApp)}`;
     window.open(waUrl, '_blank');
 
     if (showToast) {
-      showToast('Cartão baixado! Anexe a foto no WhatsApp que foi aberto.');
+      showToast('Cartão salvo! Cole o texto e envie a foto no WhatsApp.');
     }
 
     return { success: true, method: 'fallback-download-wa' };

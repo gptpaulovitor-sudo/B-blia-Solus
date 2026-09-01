@@ -337,7 +337,7 @@ export default function BibleReader() {
         {/* Botão de Fundo Carmesim com ícone do WhatsApp */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
           <span className="text-[11px] text-[#52525B] dark:text-[#A1A1AA] font-sans">
-            Gera um cartão quadrado 1080x1080 para WhatsApp com sua anotação e versículo.
+            Gera o cartão 1080x1080 com o versículo e envia sua anotação completa no texto do WhatsApp.
           </span>
 
           <button
