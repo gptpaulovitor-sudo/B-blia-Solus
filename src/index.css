@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* MODO CLARO (Light Mode - Clareza e Verdade) */
+  --solus-bg: #F9F7F1;
+  --solus-surface: #FFFFFF;
+  --solus-text: #232323;
+  --solus-muted: #52525B;
+  --solus-accent: #7A151C;
+  --solus-border: #E4E4E7;
+
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Crimson Pro', serif;
+  --font-ui: 'Inter', sans-serif;
+  --font-leitura: 'Crimson Pro', serif;
+}
+
+.dark {
+  /* MODO ESCURO (Dark Mode - Foco na Cruz e Imersão) */
+  --solus-bg: #121212;
+  --solus-surface: #1C1C1E;
+  --solus-text: #EAE6DF;
+  --solus-muted: #A1A1AA;
+  --solus-accent: #8B1C24;
+  --solus-border: #27272A;
+}
+
+.theme-sepia {
+  /* MODO SÉPIA (Sepia Mode - Ergonomia e Aconchego) */
+  --solus-bg: #F4EFE6;
+  --solus-surface: #EBE4D5;
+  --solus-text: #4A3B32;
+  --solus-muted: #786B60;
+  --solus-accent: #7A151C;
+  --solus-border: #D6CDBA;
+
+  background-color: #F4EFE6 !important;
+  color: #4A3B32 !important;
+}
+
+.theme-sepia body {
+  background-color: #F4EFE6 !important;
+  color: #4A3B32 !important;
+}
+
+@layer base {
+  html {
+    /* Previne recuo indesejado do elástico de scroll no mobile */
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--solus-bg);
+    color: var(--solus-text);
+    font-family: var(--font-ui);
+    -webkit-tap-highlight-color: transparent;
+    user-select: text;
+    -webkit-user-select: text;
+    /* Suporte a entalhe de câmera (notch) e barra de gestos */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Botões e controles não devem selecionar texto ao toque */
+  button, nav, header {
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  h1, h2, h3, .font-cinzel {
+    font-family: var(--font-heading);
+  }
+
+  .font-crimson {
+    font-family: var(--font-body);
+  }
+
+  .font-inter {
+    font-family: var(--font-ui);
+  }
+
+  .font-leitura {
+    font-family: var(--font-leitura) !important;
+  }
+}
+
+/* Custom Scrollbar for study notes panel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(161, 161, 170, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 28, 36, 0.6);
+}
+
+/* Theme specific overrides para Modo Sépia */
+.theme-sepia .bg-\[\#FFFFFF\],
+.theme-sepia .bg-white,
+.theme-sepia .bg-stone-50,
+.theme-sepia .bg-zinc-950,
+.theme-sepia .bg-zinc-900,
+.theme-sepia .bg-stone-900 {
+  background-color: #EBE4D5 !important;
+  color: #4A3B32 !important;
+}
+
+.theme-sepia .bg-\[\#F9F7F1\],
+.theme-sepia .bg-stone-100,
+.theme-sepia .bg-stone-200,
+.theme-sepia .bg-\[\#F9F7F1\]\/60 {
+  background-color: #F4EFE6 !important;
+}
+
+.theme-sepia .border-\[\#E4E4E7\],
+.theme-sepia .border-\[\#27272A\],
+.theme-sepia .border-stone-200,
+.theme-sepia .border-stone-100,
+.theme-sepia .border-stone-800,
+.theme-sepia .border-zinc-800\/80,
+.theme-sepia .border-amber-500\/30 {
+  border-color: #D6CDBA !important;
+}
+
+.theme-sepia .text-\[\#232323\],
+.theme-sepia .text-stone-900,
+.theme-sepia .text-zinc-900,
+.theme-sepia .text-stone-800,
+.theme-sepia .text-stone-700,
+.theme-sepia .text-stone-100,
+.theme-sepia .text-amber-400 {
+  color: #4A3B32 !important;
+}
+
+.theme-sepia .text-\[\#52525B\],
+.theme-sepia .text-stone-500,
+.theme-sepia .text-stone-400,
+.theme-sepia .text-zinc-500,
+.theme-sepia .text-zinc-400 {
+  color: #786B60 !important;
+}
+
+.theme-sepia .text-\[\#7A151C\],
+.theme-sepia .text-amber-600,
+.theme-sepia .text-amber-700,
+.theme-sepia .text-amber-800 {
+  color: #7A151C !important;
+}
+
+.highlight-yellow {
+  background-color: rgba(254, 240, 138, 0.85);
+  color: #713f12;
+}
+
+.highlight-green {
+  background-color: rgba(187, 247, 208, 0.85);
+  color: #14532d;
+}
+
+.highlight-blue {
+  background-color: rgba(191, 219, 254, 0.85);
+  color: #1e3a8a;
+}
+
+.highlight-pink {
+  background-color: rgba(251, 207, 232, 0.85);
+  color: #831843;
+}
+
+/* Dark mode highlight variations */
+.dark .highlight-yellow {
+  background-color: rgba(234, 179, 8, 0.35);
+  color: #fef08a;
+}
+
+.dark .highlight-green {
+  background-color: rgba(34, 197, 94, 0.35);
+  color: #bbf7d0;
+}
+
+.dark .highlight-blue {
+  background-color: rgba(59, 130, 246, 0.35);
+  color: #bfdbfe;
+}
+
+.dark .highlight-pink {
+  background-color: rgba(236, 72, 153, 0.35);
+  color: #fbcfe8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}

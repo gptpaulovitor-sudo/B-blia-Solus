@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+
+# Android temporários
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
+android/local.properties
+.gradle/
+*.apk
+*.aab

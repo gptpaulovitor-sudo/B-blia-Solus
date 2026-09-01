@@ -1,0 +1,32 @@
+Crie um aplicativo completo (Web e Mobile) para leitura e estudo bíblico, com foco em integrar o texto sagrado (versão ACF) e comentários de estudo lado a lado. A interface deve ser minimalista, sem distrações e focar na retenção da leitura.
+
+Estrutura de Banco de Dados e Coleções:
+1. 'Biblia': Livro, Capítulo, Versículo, Texto.
+2. 'Comentarios': Referencia_Versiculo, Texto_Explicativo.
+3. 'Usuarios': Progresso_Leitura, Versiculos_Marcados, Plano_Ativo.
+4. 'Planos_Leitura': Tipo_Plano, Metas_Diarias.
+
+Funcionalidades Exigidas:
+
+1. Interface de Leitura Híbrida:
+- Tela principal de leitura onde o texto bíblico flui continuamente.
+- Integração de comentários: Ao final de trechos específicos ou por meio de um ícone expansível ao lado dos versículos aplicáveis, exibir o texto correspondente das "Anotações de fé". A UI deve espelhar a formatação de uma Bíblia de estudo física.
+- Configurações de leitura: Ajuste de tamanho de fonte e alternância entre Modo Claro e Modo Escuro.
+
+2. Sistema de Interação do Leitor:
+- Seleção de texto: Ao tocar ou clicar em um versículo, abrir um menu flutuante.
+- Opções de marcação (Highlight): Seleção de pelo menos 4 cores diferentes (amarelo, verde, azul, rosa) para destacar versículos.
+- Bloco de notas: Campo para o usuário adicionar anotações pessoais vinculadas àquele versículo. Salvar no perfil do usuário.
+
+3. Módulo de Planejamento de Leitura:
+- Tela dedicada para gerenciamento de leitura com barra de progresso geral.
+- Modelos pré-definidos: Criar lógicas para "Bíblia em 1 ano (Gênesis a Apocalipse)", "Ordem Cronológica", e "Histórico/Profético".
+- Personalização de Plano: Formulário onde o usuário insere a Data de Início, Data de Término e Livros que deseja ler. O sistema deve calcular automaticamente e gerar a lista de capítulos diários.
+
+4. Dashboard Inicial e Meditação Diária:
+- Ao abrir o app, exibir um painel com o progresso do plano de leitura ativo (ex: "Dia 45 - Faltam 2 Capítulos").
+- Gerador de Meditação do Dia: Uma seção dinâmica que captura os capítulos programados para a leitura daquele dia específico, seleciona o comentário de estudo mais relevante daquele trecho e o exibe como uma meditação devocional em destaque na tela inicial.
+
+Navegação e UX:
+- Bottom Navigation Bar contendo: Início (Dashboard), Bíblia (Leitura), Planos (Metas), Perfil (Anotações e Marcações).
+-
