@@ -4,11 +4,13 @@ import { getCapituloVersiculos, LIVROS_BIBLIA } from '../../data/bibliaACF';
 import { getComentarioCapitulo } from '../../data/comentariosEstudo';
 import { Sparkles, HeartHandshake, ArrowRight, Quote, Calendar, Lightbulb, Loader2 } from 'lucide-react';
 import WhatsAppShareCard from '../Reading/WhatsAppShareCard';
+import ShareModal from '../Reading/ShareModal';
 import { handleShareWhatsApp } from '../../services/shareService';
 
 export default function DailyMeditationCard() {
   const { posicao, irParaCapitulo, versiculosMarcados, showToast } = useApp();
   const [isSharing, setIsSharing] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const cardRef = useRef(null);
 
   const livroObj = LIVROS_BIBLIA.find(l => l.id === posicao.livroId) || LIVROS_BIBLIA[0];
@@ -50,23 +52,8 @@ export default function DailyMeditationCard() {
     }
   }
 
-  const handleShareDailyMeditation = async () => {
-    try {
-      setIsSharing(true);
-      await handleShareWhatsApp({
-        notaUsuario: meditarInsight || '',
-        versiculoDoDia: {
-          texto: versiculoTexto,
-          referencia: referenciaTexto
-        },
-        cardElement: cardRef.current,
-        showToast
-      });
-    } catch (err) {
-      console.error('Erro ao compartilhar meditação diária:', err);
-    } finally {
-      setIsSharing(false);
-    }
+  const handleShareDailyMeditation = () => {
+    setIsShareModalOpen(true);
   };
 
   return (
@@ -169,6 +156,17 @@ export default function DailyMeditationCard() {
           notaUsuario={meditarInsight || ''}
         />
       </div>
+
+      {/* Modal Interativo de Compartilhamento */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        cardRef={cardRef}
+        versiculoTexto={versiculoTexto}
+        referencia={referenciaTexto}
+        notaUsuario={meditarInsight || ''}
+        showToast={showToast}
+      />
     </div>
   );
 }

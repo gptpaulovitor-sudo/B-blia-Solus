@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { X, Highlighter, NotebookPen, Copy, Share2, Trash2, Check, Loader2 } from 'lucide-react';
 import { LIVROS_BIBLIA } from '../../data/bibliaACF';
 import WhatsAppShareCard from './WhatsAppShareCard';
+import ShareModal from './ShareModal';
 import { handleShareWhatsApp } from '../../services/shareService';
 
 export default function VerseContextMenu() {
@@ -28,34 +29,19 @@ export default function VerseContextMenu() {
   const [notaTexto, setNotaTexto] = useState(versiculoExistente?.nota || '');
   const [isCopied, setIsCopied] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const cardRef = useRef(null);
 
-  const handleShareWhatsAppFromModal = async () => {
-    try {
-      setIsSharing(true);
-      registrarAtividadeHoje();
-      salvarVersiculoMarcado({
-        livroId,
-        capitulo,
-        versiculo,
-        cor: selectedColor,
-        nota: notaTexto
-      });
-
-      await handleShareWhatsApp({
-        notaUsuario: notaTexto,
-        versiculoDoDia: {
-          texto,
-          referencia: `${livroObj.nome} ${capitulo}:${versiculo}`
-        },
-        cardElement: cardRef.current,
-        showToast
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSharing(false);
-    }
+  const handleShareWhatsAppFromModal = () => {
+    registrarAtividadeHoje();
+    salvarVersiculoMarcado({
+      livroId,
+      capitulo,
+      versiculo,
+      cor: selectedColor,
+      nota: notaTexto
+    });
+    setIsShareModalOpen(true);
   };
 
   useEffect(() => {
@@ -247,6 +233,17 @@ export default function VerseContextMenu() {
           notaUsuario={notaTexto}
         />
       </div>
+
+      {/* Modal Interativo de Compartilhamento */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        cardRef={cardRef}
+        versiculoTexto={texto}
+        referencia={`${livroObj.nome} ${capitulo}:${versiculo}`}
+        notaUsuario={notaTexto}
+        showToast={showToast}
+      />
     </div>
   );
 }

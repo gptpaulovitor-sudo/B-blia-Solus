@@ -124,20 +124,20 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center',
-          gap: '14px',
-          margin: '12px 0'
+          gap: '20px',
+          margin: 'auto 0'
         }}
       >
         <div
           style={{
             fontFamily: "'Cinzel', serif",
-            fontSize: '13px',
+            fontSize: '14px',
             fontWeight: '800',
             color: '#7A151C',
-            letterSpacing: '2.5px',
+            letterSpacing: '3px',
             textTransform: 'uppercase',
             backgroundColor: 'rgba(122, 21, 28, 0.08)',
-            padding: '4px 16px',
+            padding: '6px 20px',
             borderRadius: '999px',
             border: '1px solid rgba(122, 21, 28, 0.2)'
           }}
@@ -148,13 +148,14 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
         <blockquote
           style={{
             fontFamily: "'Cinzel', serif",
-            fontSize: (versiculoTexto && versiculoTexto.length > 180) ? '26px' : '32px',
+            fontSize: (versiculoTexto && versiculoTexto.length > 200) ? '30px' : (versiculoTexto && versiculoTexto.length > 120) ? '34px' : '38px',
             fontWeight: '700',
-            lineHeight: 1.4,
+            lineHeight: 1.45,
             color: '#7A151C',
             margin: 0,
-            padding: '0 20px',
-            letterSpacing: '0.2px'
+            padding: '0 24px',
+            letterSpacing: '0.3px',
+            textShadow: '0 1px 2px rgba(122, 21, 28, 0.1)'
           }}
         >
           “{versiculoTexto || 'No princípio era o Verbo, e o Verbo estava com Deus, e o Verbo era Deus.'}”
@@ -165,8 +166,8 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
             fontFamily: "'Inter', sans-serif",
             fontStyle: 'normal',
             fontWeight: '700',
-            fontSize: '17px',
-            letterSpacing: '1px',
+            fontSize: '19px',
+            letterSpacing: '1.5px',
             color: '#4B5563',
             textTransform: 'uppercase'
           }}
@@ -175,76 +176,27 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
         </cite>
       </section>
 
-      {/* CORPO DO CARTÃO: Saudação Oficial do App */}
-      <section
+      {/* SELO: Estudo e Anotação Pessoal completos no texto da mensagem */}
+      <div
         style={{
-          width: '100%',
-          maxWidth: '920px',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '24px',
-          border: '1px solid rgba(122, 21, 28, 0.15)',
-          padding: '28px 36px',
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
+          display: 'inline-flex',
           alignItems: 'center',
-          textAlign: 'center',
-          gap: '12px',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
+          justifyContent: 'center',
+          gap: '10px',
+          backgroundColor: '#7A151C',
+          color: '#FFFFFF',
+          padding: '16px 36px',
+          borderRadius: '999px',
+          fontSize: '16px',
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: '700',
+          letterSpacing: '0.5px',
+          boxShadow: '0 6px 20px rgba(122, 21, 28, 0.28)',
+          marginBottom: '28px'
         }}
       >
-        <div
-          style={{
-            fontFamily: "'Cinzel', serif",
-            fontSize: '14px',
-            fontWeight: '800',
-            letterSpacing: '2.5px',
-            color: '#7A151C',
-            textTransform: 'uppercase',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <span>🕊️ SOLUS CHRISTUS • ESTUDO & MEDITAÇÃO DIÁRIA</span>
-        </div>
-
-        <div
-          style={{
-            fontFamily: "'Crimson Pro', serif",
-            fontStyle: 'italic',
-            fontSize: '25px',
-            lineHeight: 1.4,
-            color: '#374151'
-          }}
-        >
-          “A tua palavra é lâmpada que guia os meus passos e luz no meu caminho.”
-          <span style={{ fontSize: '16px', fontStyle: 'normal', color: '#6B7280', display: 'block', marginTop: '4px', fontWeight: '600' }}>
-            — Salmos 119:105
-          </span>
-        </div>
-
-        {notaUsuario && notaUsuario.trim().length > 0 && (
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: '#7A151C',
-              color: '#FFFFFF',
-              padding: '8px 24px',
-              borderRadius: '999px',
-              fontSize: '14px',
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              marginTop: '4px',
-              boxShadow: '0 2px 8px rgba(122, 21, 28, 0.25)'
-            }}
-          >
-            <span>✍️ Estudo e Anotação Pessoal completos no texto da mensagem 👇</span>
-          </div>
-        )}
-      </section>
+        <span>✍️ Estudo e Anotação Pessoal completos no texto da mensagem 👇</span>
+      </div>
 
       {/* RODAPÉ DO CARTÃO: Linha fina decorativa + Assinatura */}
       <footer

@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { LIVROS_BIBLIA } from '../../data/bibliaACF';
 import CommentaryPanel from './CommentaryPanel';
 import WhatsAppShareCard from './WhatsAppShareCard';
+import ShareModal from './ShareModal';
 import { handleShareWhatsApp } from '../../services/shareService';
 
 import {
@@ -35,6 +36,7 @@ export default function BibleReader() {
   const [versiculoBaseNum, setVersiculoBaseNum] = React.useState(1);
   const [notaUsuario, setNotaUsuario] = React.useState('');
   const [isSharing, setIsSharing] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
 
   // Carregar anotação existente ao mudar de livro ou capítulo
   React.useEffect(() => {
@@ -57,33 +59,18 @@ export default function BibleReader() {
 
   const referenciaCompleta = `${livroAtual.nome} ${posicao.capitulo}:${versiculoBaseObj.v}`;
 
-  const onCompartilharWhatsApp = async () => {
-    try {
-      setIsSharing(true);
-      // Salva anotação no progresso pessoal e ativa ofensiva
-      registrarAtividadeHoje();
-      salvarVersiculoMarcado({
-        livroId: posicao.livroId,
-        capitulo: posicao.capitulo,
-        versiculo: versiculoBaseObj.v,
-        nota: notaUsuario
-      });
+  const onCompartilharWhatsApp = () => {
+    // Salva anotação no progresso pessoal e ativa ofensiva
+    registrarAtividadeHoje();
+    salvarVersiculoMarcado({
+      livroId: posicao.livroId,
+      capitulo: posicao.capitulo,
+      versiculo: versiculoBaseObj.v,
+      nota: notaUsuario
+    });
 
-      // Dispara renderização e compartilhamento
-      await handleShareWhatsApp({
-        notaUsuario,
-        versiculoDoDia: {
-          texto: versiculoBaseObj.t,
-          referencia: referenciaCompleta
-        },
-        cardElement: cardRef.current,
-        showToast
-      });
-    } catch (err) {
-      console.error('Erro ao compartilhar no WhatsApp:', err);
-    } finally {
-      setIsSharing(false);
-    }
+    // Abre o Modal com o Cartão renderizado, botão de WhatsApp e botão de baixar imagem
+    setIsShareModalOpen(true);
   };
 
   const isCapLido = !!progressoCapitulos[`${posicao.livroId}-${posicao.capitulo}`];
@@ -386,6 +373,17 @@ export default function BibleReader() {
 
       {/* Painel de Estudo Profundo & Prática Diária (apenas se houver conteúdo no capítulo) */}
       <CommentaryPanel />
+
+      {/* Modal de Compartilhamento Interativo */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        cardRef={cardRef}
+        versiculoTexto={versiculoBaseObj.t}
+        referencia={referenciaCompleta}
+        notaUsuario={notaUsuario}
+        showToast={showToast}
+      />
     </div>
   );
 }
