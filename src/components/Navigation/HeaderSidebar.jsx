@@ -74,7 +74,7 @@ export default function HeaderSidebar() {
               class="flex items-center gap-3 font-cinzel text-lg font-bold text-[#9E7418] dark:text-[#F6F4EE] hover:opacity-90 transition-opacity"
               style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
             >
-              <img src="./icon-192.png" alt="Solus Christus" width="34" height="34" className="shrink-0 rounded-xl shadow-xs ring-1 ring-[#D4AF37]/40 object-cover" />
+              <img src="./icon-192.png" alt="Solus Christus" width="38" height="38" className="shrink-0 rounded-xl shadow-xs ring-1 ring-[#D4AF37]/40 object-cover" />
               <span class="tracking-wider font-bold text-xs sm:text-sm md:text-base">SOLUS CHRISTUS</span>
             </button>
 
@@ -243,7 +243,7 @@ export default function HeaderSidebar() {
               {/* Drawer Header */}
               <div class="flex items-center justify-between pb-3 border-b border-[#E8E2D5] dark:border-[#2C271E]">
                 <div class="flex items-center gap-3 font-cinzel text-base font-bold text-[#9E7418] dark:text-[#F6F4EE]" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img src="./icon-192.png" alt="Solus Christus" width="34" height="34" className="shrink-0 rounded-xl shadow-xs ring-1 ring-[#D4AF37]/40 object-cover" />
+                  <img src="./icon-192.png" alt="Solus Christus" width="38" height="38" className="shrink-0 rounded-xl shadow-xs ring-1 ring-[#D4AF37]/40 object-cover" />
                   <span>SOLUS CHRISTUS</span>
                 </div>
                 <button
