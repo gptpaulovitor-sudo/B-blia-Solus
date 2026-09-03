@@ -1,11 +1,11 @@
 // Solus Christus PWA Service Worker - Gold & Obsidian Edition
-const CACHE_NAME = 'solus-christus-v2-gold';
+const CACHE_NAME = 'solus-christus-v3-gold';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -13,6 +13,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
+    }).catch((err) => {
+      console.warn('Falha no cache inicial do Service Worker:', err);
     })
   );
 });
@@ -36,8 +38,13 @@ self.addEventListener('fetch', (event) => {
   
   const url = new URL(event.request.url);
   
-  // Para index.html e raiz, usar Network First para carregar updates de tema imediatamente
-  if (url.pathname === '/' || url.pathname.endsWith('index.html') || url.pathname.endsWith('.html')) {
+  // Para navegação / HTML: Network First para carregar updates de tema imediatamente
+  const isHtml = event.request.mode === 'navigate' || 
+                 url.pathname.endsWith('/') || 
+                 url.pathname.endsWith('index.html') || 
+                 url.pathname.endsWith('.html');
+
+  if (isHtml) {
     event.respondWith(
       fetch(event.request).then((response) => {
         if (response && response.status === 200) {
@@ -45,7 +52,11 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => caches.match(event.request))
+      }).catch(() => {
+        return caches.match(event.request).then((cached) => {
+          return cached || caches.match('./index.html') || caches.match('./');
+        });
+      })
     );
     return;
   }
@@ -65,7 +76,7 @@ self.addEventListener('fetch', (event) => {
           cache.put(event.request, responseToCache);
         });
         return response;
-      }).catch(() => caches.match('/'));
+      });
     })
   );
 });

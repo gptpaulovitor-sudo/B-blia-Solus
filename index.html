@@ -4041,7 +4041,7 @@ function gA({isOpen:o,onClose:e}){const{exportarBackup:a,importarBackup:s,recupe
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((err) => {
+          const swUrl = new URL('sw.js', window.location.href).href; navigator.serviceWorker.register(swUrl).catch((err) => {
             console.log('Registro do Service Worker ignorado:', err);
           });
         });
