@@ -32,11 +32,10 @@ export default function BottomNav() {
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex flex-col items-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                isActive
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-95 ${isActive
                   ? 'text-[#7A151C] dark:text-[#8B1C24] font-bold scale-105'
                   : 'text-[#52525B] dark:text-[#A1A1AA] hover:text-[#232323] dark:hover:text-[#EAE6DF]'
-              }`}
+                }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
               <span className="text-[11px] mt-1 tracking-tight font-sans">{item.label}</span>

@@ -1,17 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { getCapituloVersiculos, LIVROS_BIBLIA } from '../../data/bibliaACF';
 import { getComentarioCapitulo } from '../../data/comentariosEstudo';
-import { Sparkles, HeartHandshake, ArrowRight, Quote, Calendar, Lightbulb, Loader2 } from 'lucide-react';
-import WhatsAppShareCard from '../Reading/WhatsAppShareCard';
-import ShareModal from '../Reading/ShareModal';
-import { handleShareWhatsApp } from '../../services/shareService';
+import { Sparkles, HeartHandshake, ArrowRight, Quote, Calendar, Lightbulb } from 'lucide-react';
 
 export default function DailyMeditationCard() {
-  const { posicao, irParaCapitulo, versiculosMarcados, showToast } = useApp();
-  const [isSharing, setIsSharing] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const cardRef = useRef(null);
+  const { posicao, irParaCapitulo, versiculosMarcados } = useApp();
 
   const livroObj = LIVROS_BIBLIA.find(l => l.id === posicao.livroId) || LIVROS_BIBLIA[0];
   const capituloAtual = posicao.capitulo;
@@ -51,10 +45,6 @@ export default function DailyMeditationCard() {
       }
     }
   }
-
-  const handleShareDailyMeditation = () => {
-    setIsShareModalOpen(true);
-  };
 
   return (
     <div class="relative overflow-hidden bg-gradient-to-br from-amber-900 via-stone-900 to-amber-950 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-amber-500/20">
@@ -101,72 +91,17 @@ export default function DailyMeditationCard() {
       <div class="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-amber-500/20">
         <div class="flex items-center gap-2 text-xs text-amber-200/80 font-sans">
           <HeartHandshake class="w-4 h-4 text-amber-400" />
-          <span>Meditação ancorada na sua leitura ({livroObj.nome} {capituloAtual})</span>
+          <span>Meditação ancorada na sua leitura em andamento ({livroObj.nome} {capituloAtual})</span>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button
-            onClick={handleShareDailyMeditation}
-            disabled={isSharing}
-            title="Compartilhar Cartão no WhatsApp"
-            class="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[#7A151C] hover:bg-[#681117] text-white font-bold text-xs shadow-md transition-all scale-100 active:scale-95 cursor-pointer disabled:opacity-75"
-          >
-            {isSharing ? (
-              <>
-                <Loader2 class="w-4 h-4 animate-spin" />
-                <span>Gerando...</span>
-              </>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="shrink-0">
-                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.13 7.39C8.95 7.39 8.66 7.46 8.42 7.72C8.17 7.99 7.48 8.63 7.48 9.94C7.48 11.24 8.43 12.5 8.56 12.68C8.7 12.85 10.42 15.5 13.06 16.64C13.69 16.91 14.18 17.07 14.56 17.19C15.2 17.39 15.78 17.36 16.24 17.3C16.76 17.22 17.83 16.65 18.06 16.01C18.28 15.37 18.28 14.82 18.21 14.71C18.15 14.59 17.97 14.52 17.7 14.39C17.43 14.25 16.11 13.6 15.86 13.51C15.62 13.42 15.44 13.38 15.26 13.64C15.08 13.91 14.57 14.52 14.41 14.7C14.26 14.89 14.1 14.91 13.83 14.77C13.56 14.64 12.69 14.35 11.66 13.43C10.86 12.72 10.32 11.84 10.16 11.57C10.01 11.31 10.15 11.16 10.28 11.03C10.4 10.91 10.56 10.7 10.7 10.53C10.84 10.37 10.88 10.25 10.97 10.07C11.06 9.89 11.02 9.73 10.95 9.6C10.88 9.47 10.34 8.15 10.12 7.61C9.9 7.08 9.68 7.15 9.52 7.14C9.37 7.14 9.19 7.39 9.13 7.39Z" />
-                </svg>
-                <span>Compartilhar</span>
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={() => irParaCapitulo(posicao.livroId, capituloAtual)}
-            class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-extrabold text-xs shadow-lg shadow-amber-500/25 transition-all scale-100 active:scale-95 cursor-pointer"
-          >
-            <span>Ler {livroObj.nome} {capituloAtual} Completo</span>
-            <ArrowRight class="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => irParaCapitulo(posicao.livroId, capituloAtual)}
+          class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-extrabold text-xs shadow-lg shadow-amber-500/25 transition-all scale-100 active:scale-95 cursor-pointer"
+        >
+          <span>Ler {livroObj.nome} {capituloAtual} Completo</span>
+          <ArrowRight class="w-4 h-4" />
+        </button>
       </div>
-
-      {/* Cartão Padrão Oculto para Renderização de Imagem 1080x1080px */}
-      <div
-        style={{
-          position: 'fixed',
-          left: '-9999px',
-          top: 0,
-          width: '1080px',
-          height: '1080px',
-          pointerEvents: 'none',
-          zIndex: -100
-        }}
-        aria-hidden="true"
-      >
-        <WhatsAppShareCard
-          ref={cardRef}
-          versiculoTexto={versiculoTexto}
-          referencia={referenciaTexto}
-          notaUsuario={meditarInsight || ''}
-        />
-      </div>
-
-      {/* Modal Interativo de Compartilhamento */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        cardRef={cardRef}
-        versiculoTexto={versiculoTexto}
-        referencia={referenciaTexto}
-        notaUsuario={meditarInsight || ''}
-        showToast={showToast}
-      />
     </div>
   );
 }

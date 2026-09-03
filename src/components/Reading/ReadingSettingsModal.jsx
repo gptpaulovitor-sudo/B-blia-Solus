@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Type, Sun, Moon, Sparkles, Columns, AlignLeft } from 'lucide-react';
+import { X, Type, Sun, Moon, Sparkles, Columns, AlignLeft, HardDrive } from 'lucide-react';
+import BackupSyncModal from '../Common/BackupSyncModal';
 
 export default function ReadingSettingsModal() {
   const { isSettingsOpen, setIsSettingsOpen, settings, setSettings } = useApp();
+  const [isBackupOpen, setIsBackupOpen] = useState(false);
 
   if (!isSettingsOpen) return null;
 
@@ -163,15 +165,28 @@ export default function ReadingSettingsModal() {
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex justify-end">
+        <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+          <button
+            onClick={() => setIsBackupOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs transition-colors"
+          >
+            <HardDrive className="w-4 h-4 text-[#7A151C] dark:text-amber-400" />
+            <span>Backup & Sincronizar</span>
+          </button>
+
           <button
             onClick={() => setIsSettingsOpen(false)}
-            className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
+            className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm"
           >
             Concluído
           </button>
         </div>
       </div>
+
+      <BackupSyncModal 
+        isOpen={isBackupOpen} 
+        onClose={() => setIsBackupOpen(false)} 
+      />
     </div>
   );
 }
