@@ -3,13 +3,14 @@
 @tailwind utilities;
 
 :root {
-  /* MODO CLARO (Light Mode - Clareza e Verdade) */
-  --solus-bg: #F9F7F1;
+  /* MODO CLARO (Light Mode - Papiro Marfim & Ouro Nobre) */
+  --solus-bg: #FAF8F5;
   --solus-surface: #FFFFFF;
-  --solus-text: #232323;
-  --solus-muted: #52525B;
-  --solus-accent: #7A151C;
-  --solus-border: #E4E4E7;
+  --solus-text: #1F1C18;
+  --solus-muted: #6B6357;
+  --solus-accent: #9E7418;
+  --solus-accent-hover: #825E0F;
+  --solus-border: #E8E2D5;
 
   --font-heading: 'Cinzel', serif;
   --font-body: 'Crimson Pro', serif;
@@ -18,31 +19,33 @@
 }
 
 .dark {
-  /* MODO ESCURO (Dark Mode - Foco na Cruz e Imersão) */
-  --solus-bg: #121212;
-  --solus-surface: #1C1C1E;
-  --solus-text: #EAE6DF;
-  --solus-muted: #A1A1AA;
-  --solus-accent: #8B1C24;
-  --solus-border: #27272A;
+  /* MODO ESCURO (Dark Mode - Ônix Profundo & Ouro Sacro) */
+  --solus-bg: #0E0E12;
+  --solus-surface: #18181D;
+  --solus-text: #F6F4EE;
+  --solus-muted: #A39D90;
+  --solus-accent: #D4AF37;
+  --solus-accent-hover: #E5C158;
+  --solus-border: #2C271E;
 }
 
 .theme-sepia {
-  /* MODO SÉPIA (Sepia Mode - Ergonomia e Aconchego) */
-  --solus-bg: #F4EFE6;
-  --solus-surface: #EBE4D5;
-  --solus-text: #4A3B32;
-  --solus-muted: #786B60;
-  --solus-accent: #7A151C;
-  --solus-border: #D6CDBA;
+  /* MODO SÉPIA (Sepia Mode - Pergaminho Antigo & Bronze Sacro) */
+  --solus-bg: #F5EFE4;
+  --solus-surface: #EBE1CE;
+  --solus-text: #3B2F24;
+  --solus-muted: #705F50;
+  --solus-accent: #966812;
+  --solus-accent-hover: #7E560C;
+  --solus-border: #D6CAA8;
 
-  background-color: #F4EFE6 !important;
-  color: #4A3B32 !important;
+  background-color: #F5EFE4 !important;
+  color: #3B2F24 !important;
 }
 
 .theme-sepia body {
-  background-color: #F4EFE6 !important;
-  color: #4A3B32 !important;
+  background-color: #F5EFE4 !important;
+  color: #3B2F24 !important;
 }
 
 @layer base {
@@ -106,7 +109,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 28, 36, 0.6);
+  background: rgba(212, 175, 55, 0.6);
 }
 
 /* Theme specific overrides para Modo Sépia */
@@ -116,50 +119,98 @@
 .theme-sepia .bg-zinc-950,
 .theme-sepia .bg-zinc-900,
 .theme-sepia .bg-stone-900 {
-  background-color: #EBE4D5 !important;
-  color: #4A3B32 !important;
+  background-color: #EBE1CE !important;
+  color: #3B2F24 !important;
 }
 
 .theme-sepia .bg-\[\#F9F7F1\],
+.theme-sepia .bg-\[\#FAF8F5\],
 .theme-sepia .bg-stone-100,
 .theme-sepia .bg-stone-200,
 .theme-sepia .bg-\[\#F9F7F1\]\/60 {
-  background-color: #F4EFE6 !important;
+  background-color: #F5EFE4 !important;
 }
 
 .theme-sepia .border-\[\#E4E4E7\],
+.theme-sepia .border-\[\#E8E2D5\],
 .theme-sepia .border-\[\#27272A\],
 .theme-sepia .border-stone-200,
 .theme-sepia .border-stone-100,
 .theme-sepia .border-stone-800,
 .theme-sepia .border-zinc-800\/80,
 .theme-sepia .border-amber-500\/30 {
-  border-color: #D6CDBA !important;
+  border-color: #D6CAA8 !important;
 }
 
 .theme-sepia .text-\[\#232323\],
+.theme-sepia .text-\[\#1F1C18\],
 .theme-sepia .text-stone-900,
 .theme-sepia .text-zinc-900,
 .theme-sepia .text-stone-800,
 .theme-sepia .text-stone-700,
 .theme-sepia .text-stone-100,
 .theme-sepia .text-amber-400 {
-  color: #4A3B32 !important;
+  color: #3B2F24 !important;
 }
 
 .theme-sepia .text-\[\#52525B\],
+.theme-sepia .text-\[\#6B6357\],
 .theme-sepia .text-stone-500,
 .theme-sepia .text-stone-400,
 .theme-sepia .text-zinc-500,
 .theme-sepia .text-zinc-400 {
-  color: #786B60 !important;
+  color: #705F50 !important;
 }
 
 .theme-sepia .text-\[\#7A151C\],
+.theme-sepia .text-\[\#8B1C24\],
+.theme-sepia .text-\[\#9E7418\],
+.theme-sepia .text-\[\#D4AF37\],
 .theme-sepia .text-amber-600,
 .theme-sepia .text-amber-700,
 .theme-sepia .text-amber-800 {
-  color: #7A151C !important;
+  color: #966812 !important;
+}
+
+.theme-sepia .bg-\[\#7A151C\],
+.theme-sepia .bg-\[\#8B1C24\],
+.theme-sepia .bg-\[\#9E7418\],
+.theme-sepia .bg-\[\#D4AF37\] {
+  background-color: #966812 !important;
+  color: #FFFFFF !important;
+}
+
+/* Utilitários Ouro Imperial & Ônix Sacro */
+.text-gold {
+  color: #9E7418;
+}
+.dark .text-gold {
+  color: #D4AF37;
+}
+
+.bg-gold {
+  background-color: #9E7418;
+  color: #FFFFFF;
+}
+.dark .bg-gold {
+  background-color: #C59B27;
+  color: #0E0E12;
+}
+
+.border-gold {
+  border-color: #9E7418;
+}
+.dark .border-gold {
+  border-color: #D4AF37;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #B58A24 50%, #8A6513 100%);
+  color: #FFFFFF;
+}
+.dark .bg-gold-gradient {
+  background: linear-gradient(135deg, #F3DA8E 0%, #D4AF37 50%, #996515 100%);
+  color: #0E0E12;
 }
 
 .highlight-yellow {

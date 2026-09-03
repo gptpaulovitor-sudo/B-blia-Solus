@@ -72,7 +72,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 bg-gradient-to-r from-[#7A151C] to-[#8B1C24] text-white flex items-center justify-between shadow-xs">
+        <div className="p-4 bg-gradient-to-r from-[#9E7418] to-[#D4AF37] text-white flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-2xl bg-white/15 backdrop-blur-xs text-white shadow-inner">
               <Smartphone className="w-6 h-6" />
@@ -101,7 +101,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
           {deferredPrompt && (
             <button
               onClick={handleInstallClick}
-              className="w-full py-3.5 px-4 bg-[#7A151C] hover:bg-[#8B1C24] text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#7A151C]/30 hover:shadow-xl transition-all active:scale-95"
+              className="w-full py-3.5 px-4 bg-[#9E7418] hover:bg-[#D4AF37] text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#9E7418]/30 hover:shadow-xl transition-all active:scale-95"
             >
               <Download className="w-5 h-5" />
               Instalar Aplicativo com 1 Toque
@@ -111,8 +111,8 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
           {/* Guia para Android (incluindo quando abre pelo WhatsApp) */}
           {(!isIOS || isAndroid) && (
             <div className="space-y-3 font-sans">
-              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#7A151C] dark:text-[#EAE6DF] border-b border-[#E4E4E7] dark:border-[#27272A] pb-2">
-                <Smartphone className="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
+              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#9E7418] dark:text-[#EAE6DF] border-b border-[#E4E4E7] dark:border-[#27272A] pb-2">
+                <Smartphone className="w-4 h-4 text-[#9E7418] dark:text-[#D4AF37]" />
                 <span>Como Fixar no seu Celular Android:</span>
               </div>
 
@@ -130,17 +130,17 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
               <div className="space-y-2.5">
                 {/* Passo 1 */}
                 <div className="flex items-start gap-3 p-3 bg-[#FFFFFF] dark:bg-[#121212] rounded-2xl border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div className="w-6 h-6 rounded-full bg-[#7A151C] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
+                  <div className="w-6 h-6 rounded-full bg-[#9E7418] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
                     1
                   </div>
                   <div className="text-xs leading-relaxed">
-                    Toque nos <strong>3 pontinhos (<MoreVertical className="w-3.5 h-3.5 inline mx-0.5 text-[#7A151C] dark:text-[#8B1C24]" />)</strong> no canto superior direito do navegador.
+                    Toque nos <strong>3 pontinhos (<MoreVertical className="w-3.5 h-3.5 inline mx-0.5 text-[#9E7418] dark:text-[#D4AF37]" />)</strong> no canto superior direito do navegador.
                   </div>
                 </div>
 
                 {/* Passo 2 */}
                 <div className="flex items-start gap-3 p-3 bg-[#FFFFFF] dark:bg-[#121212] rounded-2xl border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div className="w-6 h-6 rounded-full bg-[#7A151C] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
+                  <div className="w-6 h-6 rounded-full bg-[#9E7418] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
                     2
                   </div>
                   <div className="text-xs leading-relaxed">
@@ -154,7 +154,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
 
                 {/* Passo 3 */}
                 <div className="flex items-start gap-3 p-3 bg-[#FFFFFF] dark:bg-[#121212] rounded-2xl border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div className="w-6 h-6 rounded-full bg-[#7A151C] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
+                  <div className="w-6 h-6 rounded-full bg-[#9E7418] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
                     3
                   </div>
                   <div className="text-xs leading-relaxed">
@@ -168,14 +168,14 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
           {/* Guia para iPhone / iPad */}
           {isIOS && (
             <div className="space-y-3 font-sans">
-              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#7A151C] dark:text-[#EAE6DF] border-b border-[#E4E4E7] dark:border-[#27272A] pb-2">
+              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#9E7418] dark:text-[#EAE6DF] border-b border-[#E4E4E7] dark:border-[#27272A] pb-2">
                 <Share className="w-4 h-4 text-blue-500" />
                 <span>No iPhone / iPad (Safari):</span>
               </div>
 
               <div className="space-y-2.5">
                 <div className="flex items-start gap-3 p-3 bg-[#FFFFFF] dark:bg-[#121212] rounded-2xl border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div className="w-6 h-6 rounded-full bg-[#7A151C] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[#9E7418] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
                     1
                   </div>
                   <div className="text-xs leading-relaxed">
@@ -184,7 +184,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
                 </div>
 
                 <div className="flex items-start gap-3 p-3 bg-[#FFFFFF] dark:bg-[#121212] rounded-2xl border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div className="w-6 h-6 rounded-full bg-[#7A151C] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[#9E7418] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
                     2
                   </div>
                   <div className="text-xs leading-relaxed">
@@ -193,7 +193,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
                 </div>
 
                 <div className="flex items-start gap-3 p-3 bg-[#FFFFFF] dark:bg-[#121212] rounded-2xl border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div className="w-6 h-6 rounded-full bg-[#7A151C] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[#9E7418] text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
                     3
                   </div>
                   <div className="text-xs leading-relaxed">
@@ -205,9 +205,9 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
           )}
 
           {/* Vantagens */}
-          <div className="p-3.5 bg-[#7A151C]/5 dark:bg-[#8B1C24]/10 rounded-2xl border border-[#7A151C]/15 dark:border-[#8B1C24]/20 space-y-1.5 font-sans">
-            <div className="font-bold text-xs text-[#7A151C] dark:text-[#EAE6DF] flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
+          <div className="p-3.5 bg-[#9E7418]/5 dark:bg-[#D4AF37]/10 rounded-2xl border border-[#9E7418]/15 dark:border-[#D4AF37]/20 space-y-1.5 font-sans">
+            <div className="font-bold text-xs text-[#9E7418] dark:text-[#EAE6DF] flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-[#9E7418] dark:text-[#D4AF37]" />
               <span>Vantagens do App no seu Celular:</span>
             </div>
             <ul className="text-[11px] text-[#52525B] dark:text-[#A1A1AA] space-y-1 list-disc list-inside">
@@ -223,7 +223,7 @@ export default function InstallAppModal({ isOpen, onClose, onInstalledAck }) {
         <div className="p-3.5 bg-[#FFFFFF] dark:bg-[#121212] border-t border-[#E4E4E7] dark:border-[#27272A] flex items-center justify-between gap-2">
           <button
             onClick={handleDismissForever}
-            className="text-[11px] text-[#7A151C] dark:text-[#8B1C24] hover:underline font-bold px-2 py-1"
+            className="text-[11px] text-[#9E7418] dark:text-[#D4AF37] hover:underline font-bold px-2 py-1"
           >
             Já instalei / Não mostrar mais
           </button>

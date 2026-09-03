@@ -21,7 +21,7 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Navegação Principal"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFF]/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-t border-[#E4E4E7] dark:border-[#27272A] px-4 pt-2"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFF]/95 dark:bg-[#18181D]/95 backdrop-blur-md border-t border-[#E8E2D5] dark:border-[#2C271E] px-4 pt-2"
       style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}
     >
       <div className="flex justify-around items-center">
@@ -33,14 +33,14 @@ export default function BottomNav() {
               key={item.id}
               onClick={() => handleTabChange(item.id)}
               className={`flex flex-col items-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-95 ${isActive
-                  ? 'text-[#7A151C] dark:text-[#8B1C24] font-bold scale-105'
-                  : 'text-[#52525B] dark:text-[#A1A1AA] hover:text-[#232323] dark:hover:text-[#EAE6DF]'
+                  ? 'text-[#9E7418] dark:text-[#D4AF37] font-bold scale-105'
+                  : 'text-[#6B6357] dark:text-[#A39D90] hover:text-[#1F1C18] dark:hover:text-[#F6F4EE]'
                 }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
               <span className="text-[11px] mt-1 tracking-tight font-sans">{item.label}</span>
               {isActive && (
-                <span className="w-1 h-1 rounded-full bg-[#7A151C] dark:bg-[#8B1C24] mt-0.5"></span>
+                <span className="w-1 h-1 rounded-full bg-[#9E7418] dark:bg-[#D4AF37] mt-0.5"></span>
               )}
             </button>
           );

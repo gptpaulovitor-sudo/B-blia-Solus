@@ -20,6 +20,7 @@ import {
   BarChart3,
   HardDrive
 } from 'lucide-react';
+import { formatarIntervalosVersiculos } from '../../utils/bibleHelpers';
 import BackupSyncModal from '../Common/BackupSyncModal';
 
 export default function ProfileView() {
@@ -120,7 +121,49 @@ export default function ProfileView() {
     };
   }
 
-  const marcacoesFiltradas = (versiculosMarcados || []).filter(v => {
+  // Agrupar marcações e anotações unificadas (que compartilham mesmo grupo ou mesma nota no capítulo)
+  const marcacoesUnificadas = React.useMemo(() => {
+    const grupos = new Map();
+
+    (versiculosMarcados || []).forEach(item => {
+      const notaLimpa = (item.nota || '').trim();
+      const chave = item.grupoId 
+        ? item.grupoId 
+        : (notaLimpa !== '' 
+            ? `${item.livroId}_${item.capitulo}_nota_${notaLimpa}`
+            : `${item.livroId}_${item.capitulo}_v_${item.versiculo}_${item.cor || ''}`);
+
+      const vNum = Number(item.versiculo);
+      const listaVers = Array.isArray(item.versiculos) && item.versiculos.length > 0
+        ? item.versiculos.map(Number)
+        : [vNum];
+
+      if (!grupos.has(chave)) {
+        grupos.set(chave, {
+          id: item.id || `grupo_${item.livroId}_${item.capitulo}_${vNum}`,
+          livroId: item.livroId,
+          capitulo: Number(item.capitulo),
+          versiculos: [...new Set(listaVers)].sort((a, b) => a - b),
+          cor: item.cor || null,
+          nota: item.nota || '',
+          data: item.data || new Date().toISOString()
+        });
+      } else {
+        const grupo = grupos.get(chave);
+        listaVers.forEach(v => {
+          if (!grupo.versiculos.includes(v)) {
+            grupo.versiculos.push(v);
+          }
+        });
+        grupo.versiculos.sort((a, b) => a - b);
+        if (!grupo.cor && item.cor) grupo.cor = item.cor;
+      }
+    });
+
+    return Array.from(grupos.values());
+  }, [versiculosMarcados]);
+
+  const marcacoesFiltradas = marcacoesUnificadas.filter(v => {
     // Filtro por cor/tipo
     if (activeFilterColor === 'notes' && (!v.nota || v.nota.trim() === '')) return false;
     if (activeFilterColor !== 'all' && activeFilterColor !== 'notes' && v.cor !== activeFilterColor) return false;
@@ -141,25 +184,25 @@ export default function ProfileView() {
     <div class="min-h-screen pb-28 md:pb-12 pt-4 px-4 max-w-7xl mx-auto space-y-8 animate-fade-in">
       
       {/* Header Profile Banner */}
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 md:p-8 border border-[#E4E4E7] dark:border-[#27272A] shadow-xs">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-[#FFFFFF] dark:bg-[#18181D] rounded-3xl p-6 md:p-8 border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs">
         <div class="flex items-center gap-4">
-          <div class="w-16 h-16 rounded-3xl bg-[#7A151C] dark:bg-[#8B1C24] flex items-center justify-center text-white text-2xl font-bold shadow-lg shrink-0">
-            <User class="w-8 h-8 text-[#EAE6DF]" />
+          <div class="w-16 h-16 rounded-3xl bg-[#9E7418] dark:bg-[#D4AF37] flex items-center justify-center text-white text-2xl font-bold shadow-lg shrink-0">
+            <User class="w-8 h-8 text-[#F6F4EE]" />
           </div>
           <div>
-            <span class="text-xs font-bold text-[#7A151C] dark:text-[#8B1C24] uppercase tracking-widest">
+            <span class="text-xs font-bold text-[#9E7418] dark:text-[#D4AF37] uppercase tracking-widest">
               Solus Christus • Módulo de Disciplina
             </span>
-            <h1 class="font-cinzel font-black text-2xl md:text-3xl text-[#232323] dark:text-[#EAE6DF] tracking-tight mt-0.5">
+            <h1 class="font-cinzel font-black text-2xl md:text-3xl text-[#1F1C18] dark:text-[#F6F4EE] tracking-tight mt-0.5">
               Disciplina (Caderno & Medidores)
             </h1>
-            <p class="text-xs md:text-sm text-[#52525B] dark:text-[#A1A1AA] mt-0.5 font-sans">
+            <p class="text-xs md:text-sm text-[#6B6357] dark:text-[#A39D90] mt-0.5 font-sans">
               Medidores de leitura, progresso dos planos, destaques e anotações de estudo profundo & prática diária.
             </p>
             <div class="mt-3">
               <button
                 onClick={() => setIsBackupModalOpen(true)}
-                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#7A151C] dark:bg-[#8B1C24] hover:opacity-95 text-white font-bold text-xs shadow-sm transition-all active:scale-95"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#9E7418] dark:bg-[#D4AF37] hover:opacity-95 text-white font-bold text-xs shadow-sm transition-all active:scale-95"
               >
                 <HardDrive class="w-3.5 h-3.5" />
                 <span>Sincronização & Backup</span>
@@ -170,28 +213,28 @@ export default function ProfileView() {
 
         {/* Quick Stats Pills (5 Métricas) */}
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 w-full md:w-auto">
-          <div class="p-3 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 border border-[#7A151C]/30 dark:border-[#8B1C24]/40 text-center">
-            <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel flex items-center justify-center gap-1">
-              <Flame class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24] fill-[#7A151C]/20" />
+          <div class="p-3 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 border border-[#9E7418]/30 dark:border-[#D4AF37]/40 text-center">
+            <div class="text-lg font-extrabold text-[#9E7418] dark:text-[#D4AF37] font-cinzel flex items-center justify-center gap-1">
+              <Flame class="w-4 h-4 text-[#9E7418] dark:text-[#D4AF37] fill-[#9E7418]/20" />
               <span>{ofensivaDias}d</span>
             </div>
-            <div class="text-[10px] text-[#7A151C] dark:text-[#8B1C24] font-bold uppercase tracking-wider">Ofensiva</div>
+            <div class="text-[10px] text-[#9E7418] dark:text-[#D4AF37] font-bold uppercase tracking-wider">Ofensiva</div>
           </div>
-          <div class="p-3 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-center">
-            <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalVersiculosLidos.toLocaleString('pt-BR')}</div>
-            <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA] font-bold uppercase tracking-wider">Versículos</div>
+          <div class="p-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121215] border border-[#E8E2D5] dark:border-[#2C271E] text-center">
+            <div class="text-lg font-extrabold text-[#9E7418] dark:text-[#D4AF37] font-cinzel">{totalVersiculosLidos.toLocaleString('pt-BR')}</div>
+            <div class="text-[10px] text-[#6B6357] dark:text-[#A39D90] font-bold uppercase tracking-wider">Versículos</div>
           </div>
-          <div class="p-3 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-center">
-            <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalCapitulosLidos}</div>
-            <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA] font-bold uppercase tracking-wider">Capítulos</div>
+          <div class="p-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121215] border border-[#E8E2D5] dark:border-[#2C271E] text-center">
+            <div class="text-lg font-extrabold text-[#9E7418] dark:text-[#D4AF37] font-cinzel">{totalCapitulosLidos}</div>
+            <div class="text-[10px] text-[#6B6357] dark:text-[#A39D90] font-bold uppercase tracking-wider">Capítulos</div>
           </div>
-          <div class="p-3 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-center">
-            <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalLivrosConcluidos} / 66</div>
-            <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA] font-bold uppercase tracking-wider">Livros Lidos</div>
+          <div class="p-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121215] border border-[#E8E2D5] dark:border-[#2C271E] text-center">
+            <div class="text-lg font-extrabold text-[#9E7418] dark:text-[#D4AF37] font-cinzel">{totalLivrosConcluidos} / 66</div>
+            <div class="text-[10px] text-[#6B6357] dark:text-[#A39D90] font-bold uppercase tracking-wider">Livros Lidos</div>
           </div>
-          <div class="p-3 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-center">
-            <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalNotasPessoais}</div>
-            <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA] font-bold uppercase tracking-wider">Notas</div>
+          <div class="p-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121215] border border-[#E8E2D5] dark:border-[#2C271E] text-center">
+            <div class="text-lg font-extrabold text-[#9E7418] dark:text-[#D4AF37] font-cinzel">{totalNotasPessoais}</div>
+            <div class="text-[10px] text-[#6B6357] dark:text-[#A39D90] font-bold uppercase tracking-wider">Notas</div>
           </div>
         </div>
       </div>
@@ -200,14 +243,14 @@ export default function ProfileView() {
       <section aria-label="Medidores de Progresso de Leitura" class="space-y-6">
         
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 text-[#7A151C] dark:text-[#8B1C24] font-bold text-xs uppercase tracking-widest">
+          <div class="flex items-center gap-2 text-[#9E7418] dark:text-[#D4AF37] font-bold text-xs uppercase tracking-widest">
             <BarChart3 class="w-4 h-4" />
             <span>Medidores de Leitura & Planos</span>
           </div>
           
           <button
             onClick={() => setIsBooksDrawerOpen(!isBooksDrawerOpen)}
-            class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] text-xs font-bold text-[#7A151C] dark:text-[#8B1C24] hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shadow-xs"
+            class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] text-xs font-bold text-[#9E7418] dark:text-[#D4AF37] hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shadow-xs"
           >
             <span>{isBooksDrawerOpen ? "Ocultar Livros" : "Ver Detalhado dos 66 Livros"}</span>
             {isBooksDrawerOpen ? <ChevronUp class="w-4 h-4" /> : <ChevronDown class="w-4 h-4" />}
@@ -218,35 +261,35 @@ export default function ProfileView() {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           
           {/* MEDIDOR 1: VERSÍCULOS LIDOS */}
-          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs flex flex-col justify-between space-y-4">
+          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div class="flex items-center justify-between">
-                <div class="w-10 h-10 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24] flex items-center justify-center">
+                <div class="w-10 h-10 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 text-[#9E7418] dark:text-[#D4AF37] flex items-center justify-center">
                   <BookOpen class="w-5 h-5" />
                 </div>
-                <span class="text-xs font-extrabold text-[#7A151C] dark:text-[#8B1C24] bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 px-2.5 py-1 rounded-full">
+                <span class="text-xs font-extrabold text-[#9E7418] dark:text-[#D4AF37] bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 px-2.5 py-1 rounded-full">
                   {percentualVersiculosBiblia}% da Bíblia
                 </span>
               </div>
 
               <div class="mt-4">
-                <div class="text-xs font-bold text-[#52525B] dark:text-[#A1A1AA] uppercase tracking-wider">
+                <div class="text-xs font-bold text-[#6B6357] dark:text-[#A39D90] uppercase tracking-wider">
                   Versículos Lidos
                 </div>
-                <div class="text-3xl font-cinzel font-black text-[#232323] dark:text-[#EAE6DF] mt-1">
-                  {totalVersiculosLidos.toLocaleString('pt-BR')} <span class="text-xs text-[#52525B] dark:text-[#A1A1AA] font-sans font-normal">/ 31.102</span>
+                <div class="text-3xl font-cinzel font-black text-[#1F1C18] dark:text-[#F6F4EE] mt-1">
+                  {totalVersiculosLidos.toLocaleString('pt-BR')} <span class="text-xs text-[#6B6357] dark:text-[#A39D90] font-sans font-normal">/ 31.102</span>
                 </div>
               </div>
             </div>
 
             <div class="space-y-2">
-              <div class="w-full bg-[#F9F7F1] dark:bg-[#121212] h-2.5 rounded-full overflow-hidden border border-[#E4E4E7] dark:border-[#27272A]">
+              <div class="w-full bg-[#FAF8F5] dark:bg-[#121215] h-2.5 rounded-full overflow-hidden border border-[#E8E2D5] dark:border-[#2C271E]">
                 <div 
-                  class="bg-[#7A151C] dark:bg-[#8B1C24] h-full rounded-full transition-all duration-500"
+                  class="bg-[#9E7418] dark:bg-[#D4AF37] h-full rounded-full transition-all duration-500"
                   style={{ width: `${percentualVersiculosBiblia}%` }}
                 ></div>
               </div>
-              <div class="flex justify-between text-[11px] text-[#52525B] dark:text-[#A1A1AA] font-medium">
+              <div class="flex justify-between text-[11px] text-[#6B6357] dark:text-[#A39D90] font-medium">
                 <span>{totalCapitulosLidos} cap. lidos ({percentualCapitulosBiblia}%)</span>
                 <span>Total: 1.189 cap.</span>
               </div>
@@ -254,47 +297,47 @@ export default function ProfileView() {
           </div>
 
           {/* MEDIDOR 2: LIVROS BÍBLICOS CONCLUÍDOS */}
-          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs flex flex-col justify-between space-y-4">
+          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div class="flex items-center justify-between">
-                <div class="w-10 h-10 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24] flex items-center justify-center">
+                <div class="w-10 h-10 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 text-[#9E7418] dark:text-[#D4AF37] flex items-center justify-center">
                   <Award class="w-5 h-5" />
                 </div>
-                <span class="text-xs font-extrabold text-[#7A151C] dark:text-[#8B1C24] bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 px-2.5 py-1 rounded-full">
+                <span class="text-xs font-extrabold text-[#9E7418] dark:text-[#D4AF37] bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 px-2.5 py-1 rounded-full">
                   {totalLivrosConcluidos} de 66 Livros
                 </span>
               </div>
 
               <div class="mt-4">
-                <div class="text-xs font-bold text-[#52525B] dark:text-[#A1A1AA] uppercase tracking-wider">
+                <div class="text-xs font-bold text-[#6B6357] dark:text-[#A39D90] uppercase tracking-wider">
                   Livros Lidos
                 </div>
-                <div class="text-3xl font-cinzel font-black text-[#232323] dark:text-[#EAE6DF] mt-1">
-                  {totalLivrosConcluidos} <span class="text-xs text-[#52525B] dark:text-[#A1A1AA] font-sans font-normal">completo(s)</span>
+                <div class="text-3xl font-cinzel font-black text-[#1F1C18] dark:text-[#F6F4EE] mt-1">
+                  {totalLivrosConcluidos} <span class="text-xs text-[#6B6357] dark:text-[#A39D90] font-sans font-normal">completo(s)</span>
                 </div>
               </div>
             </div>
 
-            <div class="space-y-2 pt-2 border-t border-[#E4E4E7] dark:border-[#27272A]">
+            <div class="space-y-2 pt-2 border-t border-[#E8E2D5] dark:border-[#2C271E]">
               <div class="grid grid-cols-2 gap-2 text-center text-xs">
-                <div class="p-2 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div class="font-bold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalLivrosATConcluidos} / 39</div>
-                  <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA]">Antigo Test.</div>
+                <div class="p-2 rounded-xl bg-[#FAF8F5] dark:bg-[#121215] border border-[#E8E2D5] dark:border-[#2C271E]">
+                  <div class="font-bold text-[#9E7418] dark:text-[#D4AF37] font-cinzel">{totalLivrosATConcluidos} / 39</div>
+                  <div class="text-[10px] text-[#6B6357] dark:text-[#A39D90]">Antigo Test.</div>
                 </div>
-                <div class="p-2 rounded-xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A]">
-                  <div class="font-bold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalLivrosNTConcluidos} / 27</div>
-                  <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA]">Novo Test.</div>
+                <div class="p-2 rounded-xl bg-[#FAF8F5] dark:bg-[#121215] border border-[#E8E2D5] dark:border-[#2C271E]">
+                  <div class="font-bold text-[#9E7418] dark:text-[#D4AF37] font-cinzel">{totalLivrosNTConcluidos} / 27</div>
+                  <div class="text-[10px] text-[#6B6357] dark:text-[#A39D90]">Novo Test.</div>
                 </div>
               </div>
               {totalLivrosIniciados > 0 && (
-                <div class="text-[11px] text-[#52525B] dark:text-[#A1A1AA] text-center font-medium">
+                <div class="text-[11px] text-[#6B6357] dark:text-[#A39D90] text-center font-medium">
                   + {totalLivrosIniciados} livro(s) em andamento
                 </div>
               )}
               {planoAtivo && planoAtivo.livrosLidosIds && planoAtivo.livrosLidosIds.length > 0 && (
                 <button
                   onClick={() => marcarLivrosComoLidos(planoAtivo.livrosLidosIds)}
-                  class="mt-2 w-full py-1.5 px-2.5 rounded-xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 hover:bg-[#7A151C]/20 text-[#7A151C] dark:text-[#8B1C24] font-bold text-[11px] border border-[#7A151C]/30 transition-all flex items-center justify-center gap-1.5"
+                  class="mt-2 w-full py-1.5 px-2.5 rounded-xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 hover:bg-[#9E7418]/20 text-[#9E7418] dark:text-[#D4AF37] font-bold text-[11px] border border-[#9E7418]/30 transition-all flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle2 class="w-3.5 h-3.5" />
                   <span>Sincronizar {planoAtivo.livrosLidosIds.length} livro(s) do Plano Ativo</span>
@@ -304,32 +347,32 @@ export default function ProfileView() {
           </div>
 
           {/* MEDIDOR 3: PLANOS INICIADOS E EM ANDAMENTO */}
-          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs flex flex-col justify-between space-y-4">
+          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div class="flex items-center justify-between">
-                <div class="w-10 h-10 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24] flex items-center justify-center">
+                <div class="w-10 h-10 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 text-[#9E7418] dark:text-[#D4AF37] flex items-center justify-center">
                   <Target class="w-5 h-5" />
                 </div>
-                <span class="text-xs font-extrabold text-[#7A151C] dark:text-[#8B1C24] bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 px-2.5 py-1 rounded-full">
+                <span class="text-xs font-extrabold text-[#9E7418] dark:text-[#D4AF37] bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 px-2.5 py-1 rounded-full">
                   {infoPlanoAtivo ? "Plano em Andamento" : "Sem Plano Ativo"}
                 </span>
               </div>
 
               <div class="mt-4">
-                <div class="text-xs font-bold text-[#52525B] dark:text-[#A1A1AA] uppercase tracking-wider">
+                <div class="text-xs font-bold text-[#6B6357] dark:text-[#A39D90] uppercase tracking-wider">
                   Plano de Leitura
                 </div>
                 {infoPlanoAtivo ? (
                   <div class="mt-1">
-                    <div class="text-base font-cinzel font-bold text-[#232323] dark:text-[#EAE6DF] line-clamp-1">
+                    <div class="text-base font-cinzel font-bold text-[#1F1C18] dark:text-[#F6F4EE] line-clamp-1">
                       {infoPlanoAtivo.titulo}
                     </div>
-                    <div class="text-xs text-[#52525B] dark:text-[#A1A1AA] mt-0.5">
+                    <div class="text-xs text-[#6B6357] dark:text-[#A39D90] mt-0.5">
                       {infoPlanoAtivo.capsLidos} de {infoPlanoAtivo.totalCapitulos} cap. ({infoPlanoAtivo.percentualCapitulos}%)
                     </div>
                   </div>
                 ) : (
-                  <div class="text-sm font-medium text-[#52525B] dark:text-[#A1A1AA] mt-1">
+                  <div class="text-sm font-medium text-[#6B6357] dark:text-[#A39D90] mt-1">
                     Nenhum plano em andamento no momento.
                   </div>
                 )}
@@ -338,13 +381,13 @@ export default function ProfileView() {
 
             {infoPlanoAtivo ? (
               <div class="space-y-2">
-                <div class="w-full bg-[#F9F7F1] dark:bg-[#121212] h-2.5 rounded-full overflow-hidden border border-[#E4E4E7] dark:border-[#27272A]">
+                <div class="w-full bg-[#FAF8F5] dark:bg-[#121215] h-2.5 rounded-full overflow-hidden border border-[#E8E2D5] dark:border-[#2C271E]">
                   <div 
-                    class="bg-[#7A151C] dark:bg-[#8B1C24] h-full rounded-full transition-all duration-500"
+                    class="bg-[#9E7418] dark:bg-[#D4AF37] h-full rounded-full transition-all duration-500"
                     style={{ width: `${infoPlanoAtivo.percentualCapitulos}%` }}
                   ></div>
                 </div>
-                <div class="flex items-center justify-between text-[11px] text-[#52525B] dark:text-[#A1A1AA] font-medium">
+                <div class="flex items-center justify-between text-[11px] text-[#6B6357] dark:text-[#A39D90] font-medium">
                   <span>{infoPlanoAtivo.diasConcluidos} de {infoPlanoAtivo.totalDias} dias ({infoPlanoAtivo.percentualDias}%)</span>
                   <span>{infoPlanoAtivo.versLidos.toLocaleString('pt-BR')} vers.</span>
                 </div>
@@ -352,7 +395,7 @@ export default function ProfileView() {
             ) : (
               <button
                 onClick={() => setActiveTab('plans')}
-                class="w-full py-2.5 rounded-xl bg-[#7A151C] dark:bg-[#8B1C24] hover:bg-[#681117] dark:hover:bg-[#7A151C] text-white font-bold text-xs shadow-md transition-all text-center block"
+                class="w-full py-2.5 rounded-xl bg-[#9E7418] dark:bg-[#D4AF37] hover:bg-[#855F0E] dark:hover:bg-[#9E7418] text-white font-bold text-xs shadow-md transition-all text-center block"
               >
                 Iniciar um Plano na Obediência &rarr;
               </button>
@@ -363,25 +406,25 @@ export default function ProfileView() {
 
         {/* EXPANSÍVEL: DETALHAMENTO DOS 66 LIVROS */}
         {isBooksDrawerOpen && (
-          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs space-y-4 animate-fade-in">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4E4E7] dark:border-[#27272A]">
+          <div class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs space-y-4 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E2D5] dark:border-[#2C271E]">
               <div>
-                <h3 class="font-cinzel font-bold text-lg text-[#232323] dark:text-[#EAE6DF]">
+                <h3 class="font-cinzel font-bold text-lg text-[#1F1C18] dark:text-[#F6F4EE]">
                   Progresso Detalhado dos 66 Livros Bíblicos
                 </h3>
-                <p class="text-xs text-[#52525B] dark:text-[#A1A1AA]">
+                <p class="text-xs text-[#6B6357] dark:text-[#A39D90]">
                   Status individual de leitura e conclusão de cada livro.
                 </p>
               </div>
 
               {/* Filtro AT / NT */}
-              <div class="flex items-center gap-1 bg-[#F9F7F1] dark:bg-[#121212] p-1 rounded-xl border border-[#E4E4E7] dark:border-[#27272A]">
+              <div class="flex items-center gap-1 bg-[#FAF8F5] dark:bg-[#121215] p-1 rounded-xl border border-[#E8E2D5] dark:border-[#2C271E]">
                 <button
                   onClick={() => setBooksFilterTestament('all')}
                   class={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                     booksFilterTestament === 'all'
-                      ? 'bg-[#7A151C] dark:bg-[#8B1C24] text-white shadow-xs'
-                      : 'text-[#52525B] dark:text-[#A1A1AA] hover:text-[#232323]'
+                      ? 'bg-[#9E7418] dark:bg-[#C59B27] text-white dark:text-[#0E0E12] shadow-xs'
+                      : 'text-[#6B6357] dark:text-[#A39D90] hover:text-[#1F1C18]'
                   }`}
                 >
                   Todos (66)
@@ -390,8 +433,8 @@ export default function ProfileView() {
                   onClick={() => setBooksFilterTestament('AT')}
                   class={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                     booksFilterTestament === 'AT'
-                      ? 'bg-[#7A151C] dark:bg-[#8B1C24] text-white shadow-xs'
-                      : 'text-[#52525B] dark:text-[#A1A1AA] hover:text-[#232323]'
+                      ? 'bg-[#9E7418] dark:bg-[#C59B27] text-white dark:text-[#0E0E12] shadow-xs'
+                      : 'text-[#6B6357] dark:text-[#A39D90] hover:text-[#1F1C18]'
                   }`}
                 >
                   Antigo Test. (39)
@@ -400,8 +443,8 @@ export default function ProfileView() {
                   onClick={() => setBooksFilterTestament('NT')}
                   class={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                     booksFilterTestament === 'NT'
-                      ? 'bg-[#7A151C] dark:bg-[#8B1C24] text-white shadow-xs'
-                      : 'text-[#52525B] dark:text-[#A1A1AA] hover:text-[#232323]'
+                      ? 'bg-[#9E7418] dark:bg-[#C59B27] text-white dark:text-[#0E0E12] shadow-xs'
+                      : 'text-[#6B6357] dark:text-[#A39D90] hover:text-[#1F1C18]'
                   }`}
                 >
                   Novo Test. (27)
@@ -421,12 +464,12 @@ export default function ProfileView() {
                       livro.isConcluido 
                         ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800' 
                         : livro.capsLidos > 0 
-                          ? 'bg-[#F9F7F1] dark:bg-[#121212] border-[#7A151C]/40 dark:border-[#8B1C24]/50'
-                          : 'bg-[#F9F7F1]/60 dark:bg-[#121212]/60 border-[#E4E4E7] dark:border-[#27272A] opacity-70 hover:opacity-100'
+                          ? 'bg-[#FAF8F5] dark:bg-[#121215] border-[#9E7418]/40 dark:border-[#D4AF37]/50'
+                          : 'bg-[#FAF8F5]/60 dark:bg-[#121215]/60 border-[#E8E2D5] dark:border-[#2C271E] opacity-70 hover:opacity-100'
                     }`}
                   >
                     <div class="flex items-center justify-between gap-1">
-                      <span class="font-serif font-bold text-xs text-[#232323] dark:text-[#EAE6DF] truncate">
+                      <span class="font-serif font-bold text-xs text-[#1F1C18] dark:text-[#F6F4EE] truncate">
                         {livro.nome}
                       </span>
                       <div class="flex items-center gap-1 shrink-0">
@@ -437,7 +480,7 @@ export default function ProfileView() {
                           </span>
                         ) : (
                           <>
-                            <span class="text-[10px] font-semibold text-[#52525B] dark:text-[#A1A1AA]">
+                            <span class="text-[10px] font-semibold text-[#6B6357] dark:text-[#A39D90]">
                               {livro.capsLidos}/{livro.capitulos} cap
                             </span>
                             <button
@@ -458,7 +501,7 @@ export default function ProfileView() {
                     <div class="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden mt-2">
                       <div 
                         class={`h-full rounded-full transition-all duration-300 ${
-                          livro.isConcluido ? 'bg-emerald-600' : 'bg-[#7A151C] dark:bg-[#8B1C24]'
+                          livro.isConcluido ? 'bg-emerald-600' : 'bg-[#9E7418] dark:bg-[#D4AF37]'
                         }`}
                         style={{ width: `${livro.percentual}%` }}
                       ></div>
@@ -565,64 +608,78 @@ export default function ProfileView() {
             </p>
           </div>
         ) : (
-          <div class="space-y-4">
+          <div className="space-y-4">
             {marcacoesFiltradas.map((item) => {
               const livroObj = LIVROS_BIBLIA.find(l => l.id === item.livroId) || { nome: item.livroId };
-              const versiculos = getCapituloVersiculos(item.livroId, item.capitulo);
-              const versiculoObj = versiculos.find(v => Number(v.v) === Number(item.versiculo)) || { t: "Texto bíblico" };
+              const versiculosCap = getCapituloVersiculos(item.livroId, item.capitulo) || [];
+              const listaVers = item.versiculos || [item.versiculo];
 
+              // Montar texto agrupado de todos os versículos do conjunto
+              const textoCombinado = listaVers.map(numVer => {
+                const vObj = versiculosCap.find(v => Number(v.v) === Number(numVer));
+                const t = vObj ? vObj.t : '';
+                return listaVers.length > 1 ? `(${numVer}) ${t}` : t;
+              }).filter(Boolean).join(' ');
+
+              const refVersiculos = formatarIntervalosVersiculos(listaVers);
+              const referenciaExibicao = `${livroObj.nome} ${item.capitulo}:${refVersiculos}`;
               const highlightBgClass = item.cor ? `highlight-${item.cor}` : '';
 
               return (
                 <div
                   key={item.id}
-                  class="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/40 space-y-3 transition-all hover:border-amber-400"
+                  className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/40 space-y-3 transition-all hover:border-amber-400"
                 >
                   {/* Verse Reference Header */}
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="font-serif font-bold text-sm text-stone-900 dark:text-stone-100">
-                        {livroObj.nome} {item.capitulo}:{item.versiculo}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-serif font-bold text-sm text-stone-900 dark:text-stone-100">
+                        {referenciaExibicao}
                       </span>
+                      {listaVers.length > 1 && (
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#9E7418]/10 text-[#9E7418] dark:bg-[#D4AF37]/20 dark:text-amber-400">
+                          {listaVers.length} versículos unificados
+                        </span>
+                      )}
                       {item.cor && (
-                        <span class={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${highlightBgClass}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${highlightBgClass}`}>
                           {item.cor}
                         </span>
                       )}
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => irParaCapitulo(item.livroId, item.capitulo)}
-                        class="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
+                        className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
                       >
                         <span>Abrir no Texto</span>
-                        <ExternalLink class="w-3.5 h-3.5" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </button>
 
                       <button
-                        onClick={() => removerVersiculoMarcado(item.livroId, item.capitulo, item.versiculo)}
-                        title="Excluir marcação"
-                        class="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors"
+                        onClick={() => removerVersiculoMarcado(item.livroId, item.capitulo, listaVers)}
+                        title="Excluir marcação/anotação"
+                        className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                       >
-                        <Trash2 class="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
 
                   {/* Verse Text Quote */}
-                  <blockquote class="font-serif italic text-sm text-stone-800 dark:text-stone-200 pl-3 border-l-2 border-amber-500 leading-relaxed">
-                    "{versiculoObj.t}"
+                  <blockquote className="font-serif italic text-sm text-stone-800 dark:text-stone-200 pl-3 border-l-2 border-amber-500 leading-relaxed max-h-36 overflow-y-auto">
+                    "{textoCombinado || 'Texto bíblico'}"
                   </blockquote>
 
                   {/* Personal Note */}
                   {item.nota && item.nota.trim() !== '' && (
-                    <div class="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700/60 text-xs text-stone-700 dark:text-stone-300 font-sans space-y-1">
-                      <div class="font-bold text-[10px] uppercase text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                        <NotebookPen class="w-3 h-3" />
+                    <div className="p-3.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700/60 text-xs text-stone-700 dark:text-stone-300 font-sans space-y-1.5">
+                      <div className="font-bold text-[10px] uppercase text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <NotebookPen className="w-3 h-3" />
                         <span>Minha Anotação Pessoal</span>
                       </div>
-                      <p class="whitespace-pre-line">{item.nota}</p>
+                      <p className="whitespace-pre-line leading-relaxed">{item.nota}</p>
                     </div>
                   )}
                 </div>

@@ -42,7 +42,7 @@ export default function ReadingSettingsModal() {
               <label className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
                 Tamanho da Fonte
               </label>
-              <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">{settings.fontSize}px</span>
+              <span className="text-sm font-semibold text-[#9E7418] dark:text-[#D4AF37]">{settings.fontSize}px</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-serif text-stone-400">A</span>
@@ -53,7 +53,7 @@ export default function ReadingSettingsModal() {
                 step={1}
                 value={settings.fontSize}
                 onChange={(e) => updateSetting('fontSize', parseInt(e.target.value, 10))}
-                className="w-full accent-amber-600 h-2 bg-stone-200 dark:bg-stone-800 rounded-lg cursor-pointer"
+                className="w-full accent-[#9E7418] dark:accent-[#D4AF37] h-2 bg-stone-200 dark:bg-stone-800 rounded-lg cursor-pointer"
               />
               <span className="text-xl font-serif text-stone-700 dark:text-stone-300">A</span>
             </div>
@@ -69,7 +69,7 @@ export default function ReadingSettingsModal() {
                 onClick={() => updateSetting('fontFamily', 'serif')}
                 className={`py-2.5 px-3 rounded-2xl border text-sm font-serif transition-all flex items-center justify-center gap-2 ${
                   settings.fontFamily === 'serif'
-                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 font-bold shadow-xs'
+                    ? 'border-[#9E7418] dark:border-[#D4AF37] bg-[#FAF8F5] dark:bg-[#18181D] text-[#9E7418] dark:text-[#D4AF37] font-bold shadow-xs'
                     : 'border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-50'
                 }`}
               >
@@ -79,7 +79,7 @@ export default function ReadingSettingsModal() {
                 onClick={() => updateSetting('fontFamily', 'sans')}
                 className={`py-2.5 px-3 rounded-2xl border text-sm font-sans transition-all flex items-center justify-center gap-2 ${
                   settings.fontFamily === 'sans'
-                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 font-bold shadow-xs'
+                    ? 'border-[#9E7418] dark:border-[#D4AF37] bg-[#FAF8F5] dark:bg-[#18181D] text-[#9E7418] dark:text-[#D4AF37] font-bold shadow-xs'
                     : 'border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-50'
                 }`}
               >
@@ -98,11 +98,11 @@ export default function ReadingSettingsModal() {
                 onClick={() => updateSetting('theme', 'light')}
                 className={`py-3 px-2 rounded-2xl border text-xs font-semibold transition-all flex flex-col items-center gap-1.5 ${
                   settings.theme === 'light'
-                    ? 'border-amber-500 bg-stone-100 text-stone-900 ring-2 ring-amber-500/20'
-                    : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50'
+                    ? 'border-[#9E7418] bg-[#FAF8F5] text-[#1F1C18] ring-2 ring-[#9E7418]/30 font-bold shadow-xs'
+                    : 'border-[#E8E2D5] bg-white text-[#6B6357] hover:bg-[#FAF8F5]'
                 }`}
               >
-                <Sun className="w-4 h-4 text-amber-500" />
+                <Sun className="w-4 h-4 text-[#9E7418]" />
                 <span>Modo Claro</span>
               </button>
 
@@ -110,11 +110,11 @@ export default function ReadingSettingsModal() {
                 onClick={() => updateSetting('theme', 'sepia')}
                 className={`py-3 px-2 rounded-2xl border text-xs font-semibold transition-all flex flex-col items-center gap-1.5 ${
                   settings.theme === 'sepia'
-                    ? 'border-[#7A151C] bg-[#EBE4D5] text-[#4A3B32] ring-2 ring-[#7A151C]/30 font-bold'
-                    : 'border-[#D6CDBA] bg-[#F4EFE6] text-[#786B60] hover:bg-[#EBE4D5]'
+                    ? 'border-[#966812] bg-[#EBE1CE] text-[#3B2F24] ring-2 ring-[#966812]/30 font-bold shadow-xs'
+                    : 'border-[#D6CAA8] bg-[#F5EFE4] text-[#705F50] hover:bg-[#EBE1CE]'
                 }`}
               >
-                <Sparkles className="w-4 h-4 text-[#7A151C]" />
+                <Sparkles className="w-4 h-4 text-[#966812]" />
                 <span>Modo Sépia</span>
               </button>
 
@@ -122,11 +122,11 @@ export default function ReadingSettingsModal() {
                 onClick={() => updateSetting('theme', 'dark')}
                 className={`py-3 px-2 rounded-2xl border text-xs font-semibold transition-all flex flex-col items-center gap-1.5 ${
                   settings.theme === 'dark'
-                    ? 'border-amber-500 bg-stone-950 text-stone-100 ring-2 ring-amber-500/20'
-                    : 'border-stone-800 bg-stone-900 text-stone-400 hover:bg-stone-800'
+                    ? 'border-[#D4AF37] bg-[#0E0E12] text-[#F6F4EE] ring-2 ring-[#D4AF37]/30 font-bold shadow-xs'
+                    : 'border-[#2C271E] bg-[#18181D] text-[#A39D90] hover:bg-[#232329]'
                 }`}
               >
-                <Moon className="w-4 h-4 text-amber-400" />
+                <Moon className="w-4 h-4 text-[#D4AF37]" />
                 <span>Modo Escuro</span>
               </button>
             </div>
@@ -170,7 +170,7 @@ export default function ReadingSettingsModal() {
             onClick={() => setIsBackupOpen(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs transition-colors"
           >
-            <HardDrive className="w-4 h-4 text-[#7A151C] dark:text-amber-400" />
+            <HardDrive className="w-4 h-4 text-[#9E7418] dark:text-amber-400" />
             <span>Backup & Sincronizar</span>
           </button>
 

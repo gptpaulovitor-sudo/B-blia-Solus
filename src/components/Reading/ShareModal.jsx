@@ -60,7 +60,7 @@ export default function ShareModal({
         {/* Header do Modal */}
         <div className="flex items-center justify-between pb-3 border-b border-[#E4E4E7] dark:border-[#27272A]">
           <div>
-            <span className="text-[11px] font-bold text-[#7A151C] dark:text-[#8B1C24] uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-[#9E7418] dark:text-[#D4AF37] uppercase tracking-wider">
               Solus Christus
             </span>
             <h3 className="font-cinzel text-lg font-bold text-[#232323] dark:text-[#EAE6DF]">
@@ -76,11 +76,11 @@ export default function ShareModal({
         </div>
 
         {/* Prévia do Cartão Oficial */}
-        <div className="p-4 rounded-2xl bg-[#7A151C] border border-[#F9F7F1]/30 text-center space-y-2.5 shadow-lg">
+        <div className="p-4 rounded-2xl bg-[#9E7418] border border-[#F9F7F1]/30 text-center space-y-2.5 shadow-lg">
           <div className="text-[10px] font-bold text-[#F9F7F1]/80 uppercase tracking-wider">
             Prévia do Cartão Oficial (1080x1080)
           </div>
-          <div className="border border-[#F9F7F1]/40 p-3.5 rounded-xl bg-[#7A151C] text-[#F9F7F1] space-y-2">
+          <div className="border border-[#F9F7F1]/40 p-3.5 rounded-xl bg-[#9E7418] text-[#F9F7F1] space-y-2">
             <div className="text-xs font-bold text-[#F9F7F1] uppercase tracking-widest font-cinzel">
               SOLUS CHRISTUS
             </div>
@@ -93,7 +93,7 @@ export default function ShareModal({
             <div className="text-[11px] font-bold text-[#F9F7F1]/90">
               — {referencia} (ACF)
             </div>
-            <div className="inline-block bg-[#F9F7F1] text-[#7A151C] text-[10px] font-bold px-3 py-1 rounded-md mt-1">
+            <div className="inline-block bg-[#F9F7F1] text-[#9E7418] text-[10px] font-bold px-3 py-1 rounded-md mt-1">
               Estudo e Anotações na mensagem
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function ShareModal({
           <button
             onClick={handleDownloadImage}
             disabled={downloading}
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl bg-[#7A151C] hover:bg-[#681117] text-white font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-75"
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl bg-[#9E7418] hover:bg-[#855F0E] text-white font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-75"
           >
             <Download className="w-4 h-4" />
             <span>{downloading ? 'Gerando Imagem...' : '2. Baixar Imagem do Cartão (1080x1080)'}</span>

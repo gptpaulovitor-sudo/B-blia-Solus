@@ -122,7 +122,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#7A151C] dark:text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#9E7418] dark:text-amber-400">
               <HardDrive className="w-5 h-5" />
             </div>
             <div>
@@ -145,7 +145,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
         {/* Resumo de Dados Atuais */}
         <div className="my-4 grid grid-cols-3 gap-2 p-3 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-stone-200/80 dark:border-stone-800 text-center">
           <div>
-            <span className="block text-base font-bold text-[#7A151C] dark:text-amber-400">
+            <span className="block text-base font-bold text-[#9E7418] dark:text-amber-400">
               {totalCapitulos}
             </span>
             <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">
@@ -153,7 +153,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
             </span>
           </div>
           <div>
-            <span className="block text-base font-bold text-[#7A151C] dark:text-amber-400">
+            <span className="block text-base font-bold text-[#9E7418] dark:text-amber-400">
               {totalMarcacoes}
             </span>
             <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">
@@ -161,7 +161,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
             </span>
           </div>
           <div>
-            <span className="block text-base font-bold text-[#7A151C] dark:text-amber-400">
+            <span className="block text-base font-bold text-[#9E7418] dark:text-amber-400">
               {ofensivaDias}d
             </span>
             <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">
@@ -176,7 +176,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
             onClick={() => setActiveTab('export')}
             className={`flex-1 pb-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 flex items-center justify-center gap-1.5 ${
               activeTab === 'export'
-                ? 'border-[#7A151C] text-[#7A151C] dark:border-amber-500 dark:text-amber-400'
+                ? 'border-[#9E7418] text-[#9E7418] dark:border-amber-500 dark:text-amber-400'
                 : 'border-transparent text-stone-400 hover:text-stone-600'
             }`}
           >
@@ -187,7 +187,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
             onClick={() => setActiveTab('import')}
             className={`flex-1 pb-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 flex items-center justify-center gap-1.5 ${
               activeTab === 'import'
-                ? 'border-[#7A151C] text-[#7A151C] dark:border-amber-500 dark:text-amber-400'
+                ? 'border-[#9E7418] text-[#9E7418] dark:border-amber-500 dark:text-amber-400'
                 : 'border-transparent text-stone-400 hover:text-stone-600'
             }`}
           >
@@ -213,7 +213,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                 <button
                   onClick={handleDownloadFile}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#7A151C] hover:bg-[#8B1C24] text-white font-bold text-xs shadow-md transition-all active:scale-95"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#9E7418] hover:bg-[#D4AF37] text-white font-bold text-xs shadow-md transition-all active:scale-95"
                 >
                   <FileJson className="w-4 h-4" />
                   <span>Baixar Arquivo (.json)</span>
@@ -270,7 +270,7 @@ export default function BackupSyncModal({ isOpen, onClose }) {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-[#7A151C] dark:hover:border-amber-500 text-stone-700 dark:text-stone-300 font-bold text-xs transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-[#9E7418] dark:hover:border-amber-500 text-stone-700 dark:text-stone-300 font-bold text-xs transition-colors"
                 >
                   <Upload className="w-4 h-4 text-stone-500" />
                   <span>Selecionar Arquivo de Backup (.json)</span>
@@ -290,11 +290,11 @@ export default function BackupSyncModal({ isOpen, onClose }) {
                   onChange={(e) => setBackupCodeInput(e.target.value)}
                   placeholder="Cole o código do backup aqui..."
                   rows={4}
-                  className="w-full p-3 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs font-mono text-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#7A151C]"
+                  className="w-full p-3 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs font-mono text-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#9E7418]"
                 />
                 <button
                   onClick={handleImportText}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#7A151C] hover:bg-[#8B1C24] text-white font-bold text-xs shadow-sm transition-all active:scale-95"
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#9E7418] hover:bg-[#D4AF37] text-white font-bold text-xs shadow-sm transition-all active:scale-95"
                 >
                   Restaurar Dados a Partir do Código
                 </button>

@@ -262,42 +262,59 @@ export function AppProvider({ children }) {
   };
 
   // Salvar / atualizar destaque ou nota de um versículo
-  const salvarVersiculoMarcado = ({ livroId, capitulo, versiculo, cor, nota }) => {
+  // Salvar / atualizar destaque ou nota de um ou múltiplos versículos
+  const salvarVersiculoMarcado = ({ livroId, capitulo, versiculo, versiculos, cor, nota }) => {
     const capNum = Number(capitulo);
-    const verNum = Number(versiculo);
-    const id = `v_${livroId}_${capNum}_${verNum}`;
+    const listaVersiculos = Array.isArray(versiculos) && versiculos.length > 0
+      ? [...new Set(versiculos.map(Number))].sort((a, b) => a - b)
+      : [Number(versiculo)];
+
     const dataAtual = new Date().toISOString();
+    const grupoId = listaVersiculos.length > 1
+      ? `grupo_${livroId}_${capNum}_${listaVersiculos[0]}_${listaVersiculos[listaVersiculos.length - 1]}`
+      : null;
 
     let atualizados = [...versiculosMarcados];
-    const index = atualizados.findIndex(
-      v => v.id === id || (v.livroId === livroId && Number(v.capitulo) === capNum && Number(v.versiculo) === verNum)
-    );
 
-    if (index >= 0) {
-      if (!cor && (!nota || nota.trim() === '')) {
-        // Remover se não tiver cor nem nota
-        atualizados.splice(index, 1);
-        showToast('Marcação removida');
-      } else {
-        atualizados[index] = {
-          ...atualizados[index],
+    if (!cor && (!nota || nota.trim() === '')) {
+      // Remover os versículos selecionados
+      atualizados = atualizados.filter(v => {
+        const mesmoCap = v.livroId === livroId && Number(v.capitulo) === capNum;
+        return !(mesmoCap && listaVersiculos.includes(Number(v.versiculo)));
+      });
+      showToast(listaVersiculos.length > 1 ? 'Anotações dos versículos removidas' : 'Marcação removida');
+    } else {
+      listaVersiculos.forEach(vNum => {
+        const id = `v_${livroId}_${capNum}_${vNum}`;
+        const index = atualizados.findIndex(
+          v => v.id === id || (v.livroId === livroId && Number(v.capitulo) === capNum && Number(v.versiculo) === vNum)
+        );
+
+        const novoItem = {
           id,
           livroId,
           capitulo: capNum,
-          versiculo: verNum,
-          cor: cor !== undefined ? cor : atualizados[index].cor,
-          nota: nota !== undefined ? nota : atualizados[index].nota,
+          versiculo: vNum,
+          versiculos: listaVersiculos,
+          grupoId,
+          cor: cor !== undefined ? cor : (index >= 0 ? atualizados[index].cor : null),
+          nota: nota !== undefined ? nota : (index >= 0 ? atualizados[index].nota : ''),
           data: dataAtual
         };
-        registrarAtividadeHoje();
-        showToast('Anotação/Marcação atualizada!');
-      }
-    } else {
-      if (cor || (nota && nota.trim() !== '')) {
-        atualizados.push({ id, livroId, capitulo: capNum, versiculo: verNum, cor: cor || null, nota: nota || '', data: dataAtual });
-        registrarAtividadeHoje();
-        showToast('Versículo destacado e salvo!');
-      }
+
+        if (index >= 0) {
+          atualizados[index] = novoItem;
+        } else {
+          atualizados.push(novoItem);
+        }
+      });
+
+      registrarAtividadeHoje();
+      showToast(
+        listaVersiculos.length > 1
+          ? `Anotação salva para ${listaVersiculos.length} versículos!`
+          : (nota && nota.trim() !== '' ? 'Anotação salva com sucesso!' : 'Versículo destacado com sucesso!')
+      );
     }
 
     setVersiculosMarcados(atualizados);
@@ -305,19 +322,30 @@ export function AppProvider({ children }) {
     setSelectedVerseModal(null);
   };
 
-  // Remover marcação/anotação de um versículo
-  const removerVersiculoMarcado = (livroId, capitulo, versiculo) => {
+  // Remover marcação/anotação de um versículo ou conjunto de versículos
+  const removerVersiculoMarcado = (livroId, capitulo, versiculoOuLista) => {
     const capNum = Number(capitulo);
-    const verNum = Number(versiculo);
-    const id = `v_${livroId}_${capNum}_${verNum}`;
+    const lista = Array.isArray(versiculoOuLista)
+      ? versiculoOuLista.map(Number)
+      : [Number(versiculoOuLista)];
+
+    // Se algum versículo pertencer a um grupo ou tiver versiculos associados, remove todos do conjunto
+    const versiculosParaRemover = new Set(lista);
+    versiculosMarcados.forEach(v => {
+      if (v.livroId === livroId && Number(v.capitulo) === capNum && lista.includes(Number(v.versiculo))) {
+        if (Array.isArray(v.versiculos)) {
+          v.versiculos.forEach(num => versiculosParaRemover.add(Number(num)));
+        }
+      }
+    });
 
     const atualizados = versiculosMarcados.filter(
-      v => !(v.id === id || (v.livroId === livroId && Number(v.capitulo) === capNum && Number(v.versiculo) === verNum))
+      v => !(v.livroId === livroId && Number(v.capitulo) === capNum && versiculosParaRemover.has(Number(v.versiculo)))
     );
 
     setVersiculosMarcados(atualizados);
     storageService.saveVersiculosMarcados(atualizados);
-    showToast('Marcação removida');
+    showToast(versiculosParaRemover.size > 1 ? 'Anotações dos versículos removidas' : 'Marcação removida');
   };
 
   // Marcar uma lista de livros inteiros como lidos no progresso global (capítulo por capítulo)

@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 /**
  * Componente do Cartão Oficial para Compartilhamento no WhatsApp
  * Resolução fixa: 1080x1080px (Quadrado de Alta Fidelidade)
- * Fundo: #7A151C (Carmesim Padrão do Solus Christus)
+ * Fundo: #9E7418 (Carmesim Padrão do Solus Christus)
  * Textos e Elementos: #F9F7F1 (Alabastro Nobre)
  * Estrutura: Cabeçalho e Rodapé generosos com linhas divisórias decorativas
  */
@@ -33,7 +33,7 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
         minHeight: '1080px',
         maxWidth: '1080px',
         maxHeight: '1080px',
-        backgroundColor: '#7A151C',
+        backgroundColor: '#9E7418',
         boxSizing: 'border-box',
         position: 'relative',
         display: 'flex',
@@ -230,7 +230,7 @@ const WhatsAppShareCard = forwardRef(({ versiculoTexto, referencia, notaUsuario,
         <div
           style={{
             backgroundColor: '#F9F7F1',
-            color: '#7A151C',
+            color: '#9E7418',
             borderRadius: '10px',
             padding: '16px 40px',
             marginBottom: '30px',

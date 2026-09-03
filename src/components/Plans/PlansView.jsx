@@ -67,23 +67,23 @@ export default function PlansView() {
     <div class="min-h-screen pb-28 md:pb-12 pt-4 px-4 max-w-7xl mx-auto space-y-8 animate-fade-in">
       
       {/* Header Banner */}
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 border border-[#E4E4E7] dark:border-[#27272A] shadow-xs">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#FFFFFF] dark:bg-[#18181D] rounded-3xl p-6 border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs">
         <div>
-          <div class="flex items-center gap-2 text-[#7A151C] dark:text-[#8B1C24] font-bold text-xs uppercase tracking-widest">
+          <div class="flex items-center gap-2 text-[#9E7418] dark:text-[#D4AF37] font-bold text-xs uppercase tracking-widest">
             <Target class="w-4 h-4" />
             <span>Solus Christus • Módulo de Obediência</span>
           </div>
-          <h1 class="font-cinzel font-black text-2xl md:text-3xl text-[#232323] dark:text-[#EAE6DF] tracking-tight mt-1">
+          <h1 class="font-cinzel font-black text-2xl md:text-3xl text-[#1F1C18] dark:text-[#F6F4EE] tracking-tight mt-1">
             Obediência (Metas & Planos Bíblicos)
           </h1>
-          <p class="text-[#52525B] dark:text-[#A1A1AA] text-xs md:text-sm mt-1 font-sans">
+          <p class="text-[#6B6357] dark:text-[#A39D90] text-xs md:text-sm mt-1 font-sans">
             Acompanhe o seu progresso diário ou crie um plano sob medida para sua rotina de discipulado.
           </p>
         </div>
 
         <button
           onClick={() => setIsCustomPlanOpen(true)}
-          class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#7A151C] dark:bg-[#8B1C24] hover:bg-[#681117] dark:hover:bg-[#7A151C] text-white font-bold text-xs shadow-md transition-all scale-100 active:scale-95 shrink-0"
+          class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#9E7418] dark:bg-[#D4AF37] hover:bg-[#855F0E] dark:hover:bg-[#9E7418] text-white font-bold text-xs shadow-md transition-all scale-100 active:scale-95 shrink-0"
         >
           <Plus class="w-4 h-4" />
           <span>Criar Plano Personalizado</span>

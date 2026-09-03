@@ -84,7 +84,7 @@ class NativeService {
       } else {
         // Light / Padrão Solus Christus
         await StatusBar.setStyle({ style: Style.Dark }); // Ícones claros sobre fundo bordô
-        await StatusBar.setBackgroundColor({ color: '#7A151C' });
+        await StatusBar.setBackgroundColor({ color: '#9E7418' });
       }
     } catch (err) {
       console.debug('[NativeService] StatusBar sync:', err?.message);

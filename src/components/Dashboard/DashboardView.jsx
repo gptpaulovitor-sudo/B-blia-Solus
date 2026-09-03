@@ -80,20 +80,20 @@ export default function DashboardView() {
     <div class="min-h-screen pb-28 md:pb-12 pt-4 px-4 max-w-7xl mx-auto space-y-8 animate-fade-in">
 
       {/* Welcome Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-3xl p-6 md:p-8 border border-[#E4E4E7] dark:border-[#27272A] shadow-xs">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#FFFFFF] dark:bg-[#18181D] rounded-3xl p-6 md:p-8 border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-[#7A151C] dark:text-[#8B1C24] font-bold text-xs uppercase tracking-widest">
+          <div className="flex items-center gap-2 text-[#9E7418] dark:text-[#D4AF37] font-bold text-xs uppercase tracking-widest">
             <Sparkles className="w-4 h-4" />
             <span>Solus Christus • Estudo Profundo & Prática Diária</span>
           </div>
-          <h1 className="font-cinzel font-black text-2xl md:text-3xl text-[#232323] dark:text-[#EAE6DF] tracking-tight">
+          <h1 className="font-cinzel font-black text-2xl md:text-3xl text-[#1F1C18] dark:text-[#F6F4EE] tracking-tight">
             Fundamento da Fé
           </h1>
 
           {/* Versículo Base Destacado */}
-          <blockquote className="p-3.5 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border-l-4 border-[#7A151C] dark:border-[#8B1C24] text-xs md:text-sm font-crimson italic text-[#232323] dark:text-[#EAE6DF]">
+          <blockquote className="p-3.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#121215] border-l-4 border-[#9E7418] dark:border-[#D4AF37] text-xs md:text-sm font-crimson italic text-[#1F1C18] dark:text-[#F6F4EE]">
             "Jesus lhe disse: Eu sou o caminho, a verdade e a vida. Ninguém vem ao Pai senão por mim."
-            <span className="block mt-1 font-sans font-bold text-[#7A151C] dark:text-[#8B1C24] not-italic text-[11px]">
+            <span className="block mt-1 font-sans font-bold text-[#9E7418] dark:text-[#D4AF37] not-italic text-[11px]">
               — João 14:6
             </span>
           </blockquote>
@@ -101,11 +101,11 @@ export default function DashboardView() {
 
         {/* Streak & Stats Counter */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 border border-[#7A151C]/20 dark:border-[#8B1C24]/30">
-            <Flame className="w-5 h-5 text-[#7A151C] dark:text-[#8B1C24] fill-[#7A151C]/20" />
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 border border-[#9E7418]/20 dark:border-[#D4AF37]/30">
+            <Flame className="w-5 h-5 text-[#9E7418] dark:text-[#D4AF37] fill-[#9E7418]/20" />
             <div>
-              <div className="text-[10px] uppercase font-bold text-[#7A151C] dark:text-[#8B1C24] tracking-wider">Ofensiva</div>
-              <div className="text-sm font-extrabold text-[#232323] dark:text-[#EAE6DF]">
+              <div className="text-[10px] uppercase font-bold text-[#9E7418] dark:text-[#D4AF37] tracking-wider">Ofensiva</div>
+              <div className="text-sm font-extrabold text-[#1F1C18] dark:text-[#F6F4EE]">
                 {ofensivaDias} {ofensivaDias === 1 ? 'Dia Seguido' : 'Dias Seguidos'}
               </div>
             </div>
@@ -287,45 +287,45 @@ export default function DashboardView() {
       <section aria-label="Acesso Rápido" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div
           onClick={() => setActiveTab('reader')}
-          class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs hover:border-[#7A151C] dark:hover:border-[#8B1C24] transition-all cursor-pointer group"
+          class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs hover:border-[#9E7418] dark:hover:border-[#D4AF37] transition-all cursor-pointer group"
         >
-          <div class="w-10 h-10 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24] flex items-center justify-center mb-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 text-[#9E7418] dark:text-[#D4AF37] flex items-center justify-center mb-3">
             <BookOpen class="w-5 h-5" />
           </div>
-          <h3 class="font-cinzel font-bold text-[#232323] dark:text-[#EAE6DF] text-lg group-hover:text-[#7A151C] dark:group-hover:text-[#8B1C24] transition-colors">
+          <h3 class="font-cinzel font-bold text-[#1F1C18] dark:text-[#F6F4EE] text-lg group-hover:text-[#9E7418] dark:group-hover:text-[#D4AF37] transition-colors">
             Raízes
           </h3>
-          <p class="text-xs text-[#52525B] dark:text-[#A1A1AA] mt-1 font-sans leading-relaxed">
+          <p class="text-xs text-[#6B6357] dark:text-[#A39D90] mt-1 font-sans leading-relaxed">
             Leitura & Estudo Profundo & Prática Diária dos 66 livros bíblicos com comentários integrados.
           </p>
         </div>
 
         <div
           onClick={() => setActiveTab('plans')}
-          class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs hover:border-[#7A151C] dark:hover:border-[#8B1C24] transition-all cursor-pointer group"
+          class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs hover:border-[#9E7418] dark:hover:border-[#D4AF37] transition-all cursor-pointer group"
         >
-          <div class="w-10 h-10 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24] flex items-center justify-center mb-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 text-[#9E7418] dark:text-[#D4AF37] flex items-center justify-center mb-3">
             <Target class="w-5 h-5" />
           </div>
-          <h3 class="font-cinzel font-bold text-[#232323] dark:text-[#EAE6DF] text-lg group-hover:text-[#7A151C] dark:group-hover:text-[#8B1C24] transition-colors">
+          <h3 class="font-cinzel font-bold text-[#1F1C18] dark:text-[#F6F4EE] text-lg group-hover:text-[#9E7418] dark:group-hover:text-[#D4AF37] transition-colors">
             Obediência
           </h3>
-          <p class="text-xs text-[#52525B] dark:text-[#A1A1AA] mt-1 font-sans leading-relaxed">
+          <p class="text-xs text-[#6B6357] dark:text-[#A39D90] mt-1 font-sans leading-relaxed">
             Metas & Planos de Leitura estruturados por datas e sugestões cronológicas.
           </p>
         </div>
 
         <div
           onClick={() => setActiveTab('profile')}
-          class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E4E4E7] dark:border-[#27272A] shadow-xs hover:border-[#7A151C] dark:hover:border-[#8B1C24] transition-all cursor-pointer group"
+          class="p-6 rounded-3xl bg-[#FFFFFF] dark:bg-[#18181D] border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs hover:border-[#9E7418] dark:hover:border-[#D4AF37] transition-all cursor-pointer group"
         >
-          <div class="w-10 h-10 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 text-[#7A151C] dark:text-[#8B1C24] flex items-center justify-center mb-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/20 text-[#9E7418] dark:text-[#D4AF37] flex items-center justify-center mb-3">
             <Bookmark class="w-5 h-5" />
           </div>
-          <h3 class="font-cinzel font-bold text-[#232323] dark:text-[#EAE6DF] text-lg group-hover:text-[#7A151C] dark:group-hover:text-[#8B1C24] transition-colors">
+          <h3 class="font-cinzel font-bold text-[#1F1C18] dark:text-[#F6F4EE] text-lg group-hover:text-[#9E7418] dark:group-hover:text-[#D4AF37] transition-colors">
             Disciplina
           </h3>
-          <p class="text-xs text-[#52525B] dark:text-[#A1A1AA] mt-1 font-sans leading-relaxed">
+          <p class="text-xs text-[#6B6357] dark:text-[#A39D90] mt-1 font-sans leading-relaxed">
             {totalMarcacoes} versículos destacados e anotações pessoais salvas no seu caderno.
           </p>
         </div>
