@@ -30,6 +30,8 @@ export default function PlansView() {
 
   const [expandedDay, setExpandedDay] = useState(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [filtroMetas, setFiltroMetas] = useState('pendentes'); // 'todos' | 'pendentes' | 'concluidos'
+  const [pageMetas, setPageMetas] = useState(30);
 
   const iconesMap = {
     Calendar: Calendar,
@@ -159,85 +161,129 @@ export default function PlansView() {
 
           {/* Daily Schedule List */}
           <div>
-            <h3 class="font-serif font-bold text-stone-900 dark:text-stone-100 text-base mb-3">
-              Lista de Metas Diárias
-            </h3>
-
-            <div class="space-y-2 max-h-96 overflow-y-auto pr-1">
-              {planoAtivo.metasDiarias?.slice(0, 30).map((meta) => {
-                const isConcluido = !!planoAtivo.progressoDias?.[meta.dia];
-                const isExpanded = expandedDay === meta.dia;
-
-                return (
-                  <div
-                    key={meta.dia}
-                    class={`p-4 rounded-2xl border transition-all ${
-                      isConcluido
-                        ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40'
-                        : 'bg-stone-50 dark:bg-stone-950/40 border-stone-200/80 dark:border-stone-800'
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h3 className="font-serif font-bold text-stone-900 dark:text-stone-100 text-base">
+                Lista de Metas Diárias
+              </h3>
+              <div className="flex gap-1 text-xs font-bold">
+                {['todos', 'pendentes', 'concluidos'].map(f => (
+                  <button
+                    key={f}
+                    onClick={() => { setFiltroMetas(f); setPageMetas(30); }}
+                    className={`px-3 py-1 rounded-lg transition-all ${
+                      filtroMetas === f
+                        ? 'bg-amber-500 text-stone-950'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200'
                     }`}
                   >
-                    <div class="flex items-center justify-between gap-3">
-                      <div class="flex items-center gap-3">
-                        <button
-                          onClick={() => toggleDiaPlanoAtivo(meta.dia)}
-                          title={isConcluido ? "Desmarcar dia" : "Marcar dia como concluído"}
-                          class="p-1 text-stone-400 hover:text-emerald-600 transition-colors"
-                        >
-                          <CheckCircle2 class={`w-6 h-6 ${isConcluido ? 'text-emerald-500 fill-emerald-500/20' : ''}`} />
-                        </button>
+                    {f === 'todos' ? 'Todos' : f === 'pendentes' ? 'Pendentes' : 'Concluídos'}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                        <div>
-                          <div class="font-bold text-sm text-stone-900 dark:text-stone-100">
-                            Dia {meta.dia} <span class="text-xs font-normal text-stone-500">({meta.dataFormatted})</span>
-                          </div>
-                          <div class="text-xs text-stone-600 dark:text-stone-400 font-serif">
-                            {meta.capitulos.map(c => `${c.livroNome} ${c.capitulo}`).join(', ')}
-                          </div>
+            {(() => {
+              const hojeISO = new Date().toISOString().split('T')[0];
+              const metasFiltradas = (planoAtivo.metasDiarias || []).filter(meta => {
+                const isConcluido = !!planoAtivo.progressoDias?.[meta.dia];
+                if (filtroMetas === 'pendentes') return !isConcluido;
+                if (filtroMetas === 'concluidos') return isConcluido;
+                return true;
+              });
+              const metasVisiveis = metasFiltradas.slice(0, pageMetas);
+              return (
+                <>
+                  <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                    {metasVisiveis.map((meta) => {
+              const isConcluido = !!planoAtivo.progressoDias?.[meta.dia];
+              const isExpanded = expandedDay === meta.dia;
+              const isHoje = meta.isoDate === hojeISO;
+
+              return (
+                <div
+                  key={meta.dia}
+                  className={`p-4 rounded-2xl border transition-all ${
+                    isHoje
+                      ? 'ring-2 ring-amber-400 bg-amber-50/60 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700'
+                      : isConcluido
+                      ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40'
+                      : 'bg-stone-50 dark:bg-stone-950/40 border-stone-200/80 dark:border-stone-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => toggleDiaPlanoAtivo(meta.dia)}
+                        title={isConcluido ? 'Desmarcar dia' : 'Marcar dia como concluído'}
+                        className="p-1 text-stone-400 hover:text-emerald-600 transition-colors"
+                      >
+                        <CheckCircle2 className={`w-6 h-6 ${isConcluido ? 'text-emerald-500 fill-emerald-500/20' : ''}`} />
+                      </button>
+
+                      <div>
+                        <div className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                          Dia {meta.dia}
+                          {isHoje && <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-500 text-stone-950">Hoje</span>}
+                          <span className="text-xs font-normal text-stone-500">({meta.dataFormatted})</span>
                         </div>
-                      </div>
-
-                      <div class="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            if (meta.capitulos && meta.capitulos.length > 0) {
-                              const capPendente = meta.capitulos.find(c => !progressoCapitulos[`${c.livroId}-${c.capitulo}`]) || meta.capitulos[0];
-                              irParaCapitulo(capPendente.livroId, capPendente.capitulo);
-                            }
-                          }}
-                          class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-black transition-all shadow-xs flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>Ir Ler</span>
-                          <ChevronRight class="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => setExpandedDay(isExpanded ? null : meta.dia)}
-                          class="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 text-xs font-semibold transition-colors"
-                        >
-                          {isExpanded ? 'Ocultar' : 'Ver Capítulos'}
-                        </button>
+                        <div className="text-xs text-stone-600 dark:text-stone-400 font-serif">
+                          {meta.capitulos.map(c => `${c.livroNome} ${c.capitulo}`).join(', ')}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Expanded list of daily chapters */}
-                    {isExpanded && (
-                      <div class="mt-3 pt-3 border-t border-stone-200/60 dark:border-stone-800 grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fade-in">
-                        {meta.capitulos.map((c) => (
-                          <button
-                            key={`${c.livroId}-${c.capitulo}`}
-                            onClick={() => irParaCapitulo(c.livroId, c.capitulo)}
-                            class="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-left text-xs font-serif font-bold text-stone-800 dark:text-stone-200 hover:border-amber-500 flex items-center justify-between"
-                          >
-                            <span>{c.livroNome} cap. {c.capitulo}</span>
-                            <ChevronRight class="w-4 h-4 text-amber-600" />
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          if (meta.capitulos && meta.capitulos.length > 0) {
+                            const capPendente = meta.capitulos.find(c => !progressoCapitulos[`${c.livroId}-${c.capitulo}`]) || meta.capitulos[0];
+                            irParaCapitulo(capPendente.livroId, capPendente.capitulo);
+                          }
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-black transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Ir Ler</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setExpandedDay(isExpanded ? null : meta.dia)}
+                        className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 text-xs font-semibold transition-colors"
+                      >
+                        {isExpanded ? 'Ocultar' : 'Ver Capítulos'}
+                      </button>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Expanded list of daily chapters */}
+                  {isExpanded && (
+                    <div className="mt-3 pt-3 border-t border-stone-200/60 dark:border-stone-800 grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fade-in">
+                      {meta.capitulos.map((c) => (
+                        <button
+                          key={`${c.livroId}-${c.capitulo}`}
+                          onClick={() => irParaCapitulo(c.livroId, c.capitulo)}
+                          className="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-left text-xs font-serif font-bold text-stone-800 dark:text-stone-200 hover:border-amber-500 flex items-center justify-between"
+                        >
+                          <span>{c.livroNome} cap. {c.capitulo}</span>
+                          <ChevronRight className="w-4 h-4 text-amber-600" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+                  </div>
+                  {pageMetas < metasFiltradas.length && (
+                    <button
+                      onClick={() => setPageMetas(p => p + 30)}
+                      className="mt-3 w-full py-2 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-bold hover:bg-amber-500 hover:text-stone-950 transition-all"
+                    >
+                      Ver mais {Math.min(30, metasFiltradas.length - pageMetas)} dias ({metasFiltradas.length - pageMetas} restantes)
+                    </button>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </section>
       )}
