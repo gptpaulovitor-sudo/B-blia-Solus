@@ -582,64 +582,56 @@ export function AppProvider({ children }) {
         }
 
         // 2. Ouvinte em tempo real (onSnapshot): atualizações feitas no celular aparecem no computador e vice-versa
-        cloudUnsub = subscribeCloudUserData(user.uid, (cloudData, hasPendingWrites) => {
+        cloudUnsub = subscribeCloudUserData(user.uid, async (cloudData, hasPendingWrites) => {
+          // hasPendingWrites = dado ainda não confirmado pelo servidor, ignorar para evitar loop
           if (hasPendingWrites || !cloudData) return;
+
+          // Evitar loop: se JÁ estamos atualizando (ex: acabamos de salvar), ignorar
+          if (isUpdatingFromCloudRef.current) return;
 
           setSyncStatusNuvem('syncing');
           isUpdatingFromCloudRef.current = true;
 
-          if (cloudData.progressoCapitulos) {
-            setProgressoCapitulos(prev => {
-              const updated = { ...prev, ...cloudData.progressoCapitulos };
-              storageService.saveProgressoCapitulos(updated);
-              return updated;
-            });
-          }
+          try {
+            // Pegar estado LOCAL atual do storage (fonte de verdade local)
+            const localData = {
+              progressoCapitulos: storageService.getProgressoCapitulos(),
+              versiculosMarcados: storageService.getVersiculosMarcados(),
+              planoAtivo: storageService.getPlanoAtivo(),
+              registrosAtividade: storageService.getRegistrosAtividade(),
+              ofensivaDias: calcularOfensivaDias(storageService.getRegistrosAtividade())
+            };
 
-          if (Array.isArray(cloudData.versiculosMarcados)) {
-            setVersiculosMarcados(prev => {
-              const map = new Map();
-              (cloudData.versiculosMarcados || []).forEach(v => {
-                if (v && (v.id || v.versiculo)) {
-                  const chave = v.id || `v_${v.livroId}_${v.capitulo}_${v.versiculo}`;
-                  map.set(chave, { ...v, id: chave });
-                }
-              });
-              (prev || []).forEach(v => {
-                if (v && (v.id || v.versiculo)) {
-                  const chave = v.id || `v_${v.livroId}_${v.capitulo}_${v.versiculo}`;
-                  if (map.has(chave)) {
-                    const c = map.get(chave);
-                    const nota = (v.nota && v.nota.trim()) ? v.nota : (c.nota || '');
-                    map.set(chave, { ...c, ...v, id: chave, nota });
-                  } else {
-                    map.set(chave, { ...v, id: chave });
-                  }
-                }
-              });
-              const uniao = Array.from(map.values());
-              storageService.saveVersiculosMarcados(uniao);
-              return uniao;
-            });
-          }
+            // Merge bidirecional: local + nuvem, sem perda de nenhum dado
+            const merged = mergeUserData(localData, cloudData);
 
-          if (cloudData.planoAtivo !== undefined) {
-            setPlanoAtivo(cloudData.planoAtivo);
-            storageService.savePlanoAtivo(cloudData.planoAtivo);
-          }
+            // Salvar estado mesclado localmente
+            storageService.saveProgressoCapitulos(merged.progressoCapitulos);
+            storageService.saveVersiculosMarcados(merged.versiculosMarcados);
+            if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
+            if (merged.registrosAtividade) storageService.saveRegistrosAtividade(merged.registrosAtividade);
 
-          if (cloudData.registrosAtividade) {
-            setRegistrosAtividade(prev => {
-              const updated = { ...prev, ...cloudData.registrosAtividade };
-              storageService.saveRegistrosAtividade(updated);
-              return updated;
-            });
-          }
+            // Atualizar o estado React
+            setProgressoCapitulos(merged.progressoCapitulos);
+            setVersiculosMarcados(merged.versiculosMarcados);
+            if (merged.planoAtivo !== undefined) setPlanoAtivo(merged.planoAtivo);
+            if (merged.registrosAtividade) setRegistrosAtividade(merged.registrosAtividade);
 
-          setSyncStatusNuvem('synced');
-          setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 400);
+            // Regravar na nuvem a versão unificada (garante que a nuvem tenha TUDO)
+            // Isso é necessário para que o outro dispositivo receba a versão completa
+            await saveUserDataToFirestore(user.uid, merged);
+
+            setSyncErrorMessage('');
+            setSyncStatusNuvem('synced');
+          } catch (e) {
+            console.error('Erro ao mesclar dados da nuvem:', e);
+            setSyncStatusNuvem('error');
+          } finally {
+            setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 500);
+          }
         }, (err) => {
           console.warn('Erro no observador Firestore onSnapshot:', err);
+          setSyncErrorMessage(err?.message || err?.code || String(err));
           setSyncStatusNuvem('error');
         });
       } else {

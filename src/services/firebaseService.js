@@ -220,7 +220,11 @@ export function subscribeCloudUserData(uid, onData, onError) {
 export function mergeUserData(local = {}, cloud = {}) {
   const localProg = local.progressoCapitulos || {};
   const cloudProg = cloud.progressoCapitulos || {};
-  const progressoCapitulos = { ...cloudProg, ...localProg };
+  // UNIÃO real: capítulo lido em QUALQUER dispositivo = lido para sempre
+  // Nunca apaga um progresso — apenas adiciona
+  const progressoCapitulos = {};
+  Object.keys(cloudProg).forEach(k => { if (cloudProg[k]) progressoCapitulos[k] = true; });
+  Object.keys(localProg).forEach(k => { if (localProg[k]) progressoCapitulos[k] = true; });
 
   // Versículos Marcados: união inteligente por ID
   const mapVersiculos = new Map();
