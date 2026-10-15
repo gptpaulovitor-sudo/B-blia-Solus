@@ -634,6 +634,9 @@ export function AppProvider({ children }) {
 
           setSyncStatusNuvem('synced');
           setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 400);
+        }, (err) => {
+          console.warn('Erro no observador Firestore onSnapshot:', err);
+          setSyncStatusNuvem('error');
         });
       } else {
         setSyncStatusNuvem('idle');
@@ -647,7 +650,7 @@ export function AppProvider({ children }) {
   }, []);
 
   // Enviar alterações para a nuvem automaticamente quando o usuário estiver logado
-  const sincronizarComNuvem = async (dadosExtras = {}) => {
+  const sincronizarComNuvem = async (dadosExtras = {}, manual = false) => {
     if (!usuarioGoogle?.uid || isUpdatingFromCloudRef.current) return;
     setSyncStatusNuvem('syncing');
     try {
@@ -659,11 +662,19 @@ export function AppProvider({ children }) {
         ofensivaDias: storageService.getOfensivaDias(),
         ...dadosExtras
       };
-      await saveUserDataToFirestore(usuarioGoogle.uid, payload);
-      setSyncStatusNuvem('synced');
+      const res = await saveUserDataToFirestore(usuarioGoogle.uid, payload);
+      if (res?.sucesso) {
+        setSyncStatusNuvem('synced');
+        if (manual) showToast('Sincronizado com a nuvem com sucesso!');
+      } else {
+        setSyncStatusNuvem('error');
+        console.warn('Erro ao salvar no Firestore:', res?.erro);
+        if (manual) showToast(`Erro ao gravar na nuvem: ${res?.erro || 'Permissão negada no Firestore'}`);
+      }
     } catch (e) {
       console.error('Erro ao sincronizar com nuvem:', e);
       setSyncStatusNuvem('error');
+      if (manual) showToast('Erro de conexão ao sincronizar com nuvem.');
     }
   };
 
