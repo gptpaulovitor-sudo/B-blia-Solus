@@ -207,10 +207,26 @@ export default function ProfileView() {
                 Solus Christus • Módulo de Disciplina
               </span>
               {usuarioGoogle && (
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>Google Sincronizado</span>
-                </span>
+                syncStatusNuvem === 'synced' ? (
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Google Sincronizado</span>
+                  </span>
+                ) : syncStatusNuvem === 'syncing' ? (
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-[10px] font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-spin"></span>
+                    <span>Sincronizando...</span>
+                  </span>
+                ) : (
+                  <button 
+                    onClick={() => setIsBackupModalOpen(true)}
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold cursor-pointer hover:bg-amber-200"
+                    title="Clique para ver o status da sincronização"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span>Nuvem Pendente (Local Salvo)</span>
+                  </button>
+                )
               )}
             </div>
             <h1 class="font-cinzel font-black text-2xl md:text-3xl text-[#1F1C18] dark:text-[#F6F4EE] tracking-tight mt-0.5">
@@ -218,7 +234,10 @@ export default function ProfileView() {
             </h1>
             <p class="text-xs md:text-sm text-[#6B6357] dark:text-[#A39D90] mt-0.5 font-sans">
               {usuarioGoogle 
-                ? `${usuarioGoogle.email} • Progresso salvo e sincronizado na nuvem do Google.` 
+                ? (syncStatusNuvem === 'error'
+                    ? `${usuarioGoogle.email} • Gravação na nuvem pendente de liberação no Firestore. Seus dados estão seguros localmente!`
+                    : `${usuarioGoogle.email} • Progresso salvo e sincronizado na nuvem do Google.`
+                  )
                 : 'Medidores de leitura, progresso dos planos, destaques e anotações de estudo profundo & prática diária.'}
             </p>
             <div class="mt-3 flex items-center gap-2 flex-wrap">

@@ -334,17 +334,60 @@ export default function BackupSyncModal({ isOpen, onClose, initialTab = 'cloud' 
 
                   <div className="p-3 rounded-2xl bg-white dark:bg-stone-900 border border-emerald-100 dark:border-emerald-900/30 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2.5 h-2.5 rounded-full ${syncStatusNuvem === 'syncing' ? 'bg-amber-500 animate-spin' : 'bg-emerald-500 animate-pulse'}`}></div>
+                      <div className={`w-2.5 h-2.5 rounded-full ${syncStatusNuvem === 'syncing' ? 'bg-amber-500 animate-spin' : syncStatusNuvem === 'error' ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></div>
                       <span className="font-semibold text-stone-800 dark:text-stone-200">
-                        {syncStatusNuvem === 'syncing' ? 'Sincronizando com a Nuvem...' : 'Progresso sincronizado em tempo real na nuvem'}
+                        {syncStatusNuvem === 'syncing' 
+                          ? 'Sincronizando com a Nuvem...' 
+                          : syncStatusNuvem === 'error' 
+                            ? 'Aguardando liberação de escrita no Firestore' 
+                            : 'Progresso sincronizado em tempo real na nuvem'}
                       </span>
                     </div>
                     <span className="text-[10px] text-stone-400">Google Firestore</span>
                   </div>
 
+                  {syncStatusNuvem === 'error' && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>Sincronização em Nuvem: Firestore Bloqueado</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed">
+                        Sua conta Google está autenticada, mas o banco de dados Cloud Firestore retornou <strong>permissão negada</strong> para gravação no projeto <code className="bg-amber-200/60 dark:bg-amber-900/60 px-1 py-0.5 rounded">biblia-online-8bce0</code>.
+                      </p>
+                      <div className="p-2.5 rounded-xl bg-white/70 dark:bg-stone-900/60 border border-amber-200 dark:border-amber-900 text-[11px] space-y-1">
+                        <p className="font-bold text-amber-950 dark:text-amber-300">Como liberar a nuvem definitivamente:</p>
+                        <p>1. Acesse <u>console.firebase.google.com</u> &gt; projeto <b>biblia-online-8bce0</b></p>
+                        <p>2. Vá em <b>Firestore Database</b> &gt; aba <b>Regras (Rules)</b></p>
+                        <p>3. Permita escrita para usuários autenticados:</p>
+                        <pre className="p-1.5 bg-stone-100 dark:bg-stone-800 rounded font-mono text-[10px] select-all overflow-x-auto">
+{`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{userId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}`}
+                        </pre>
+                      </div>
+                      <div className="pt-1 flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+                          ⚡ Solução instantânea (sem esperar pelo Firebase):
+                        </span>
+                        <button
+                          onClick={() => setActiveTab('export')}
+                          className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-bold cursor-pointer transition-all"
+                        >
+                          Ir para Exportar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between gap-2 pt-1">
                     <button
-                      onClick={() => sincronizarComNuvem()}
+                      onClick={() => sincronizarComNuvem({}, true)}
                       disabled={syncStatusNuvem === 'syncing'}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
                     >

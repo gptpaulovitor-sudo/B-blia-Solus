@@ -533,33 +533,44 @@ export function AppProvider({ children }) {
 
         // 1. Carga inicial e mesclagem bidirecional (sem perda de capítulos ou notas)
         try {
-          const cloudData = await loadUserDataFromFirestore(user.uid);
-          const localData = {
-            progressoCapitulos: storageService.getProgressoCapitulos(),
-            versiculosMarcados: storageService.getVersiculosMarcados(),
-            planoAtivo: storageService.getPlanoAtivo(),
-            registrosAtividade: storageService.getRegistrosAtividade(),
-            ofensivaDias: storageService.getOfensivaDias()
-          };
+          const cloudRes = await loadUserDataFromFirestore(user.uid);
+          if (cloudRes?.erro) {
+            console.warn('Erro ao carregar dados do Firestore:', cloudRes.erro);
+            setSyncStatusNuvem('error');
+          } else {
+            const cloudData = cloudRes?.dados;
+            const localData = {
+              progressoCapitulos: storageService.getProgressoCapitulos(),
+              versiculosMarcados: storageService.getVersiculosMarcados(),
+              planoAtivo: storageService.getPlanoAtivo(),
+              registrosAtividade: storageService.getRegistrosAtividade(),
+              ofensivaDias: storageService.getOfensivaDias()
+            };
 
-          const merged = mergeUserData(localData, cloudData);
+            const merged = mergeUserData(localData, cloudData);
 
-          isUpdatingFromCloudRef.current = true;
-          storageService.saveProgressoCapitulos(merged.progressoCapitulos);
-          storageService.saveVersiculosMarcados(merged.versiculosMarcados);
-          if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
-          if (merged.registrosAtividade) storageService.saveRegistrosAtividade(merged.registrosAtividade);
-          storageService.saveOfensivaDias(merged.ofensivaDias);
+            isUpdatingFromCloudRef.current = true;
+            storageService.saveProgressoCapitulos(merged.progressoCapitulos);
+            storageService.saveVersiculosMarcados(merged.versiculosMarcados);
+            if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
+            if (merged.registrosAtividade) storageService.saveRegistrosAtividade(merged.registrosAtividade);
+            storageService.saveOfensivaDias(merged.ofensivaDias);
 
-          setProgressoCapitulos(merged.progressoCapitulos);
-          setVersiculosMarcados(merged.versiculosMarcados);
-          if (merged.planoAtivo) setPlanoAtivo(merged.planoAtivo);
-          if (merged.registrosAtividade) setRegistrosAtividade(merged.registrosAtividade);
+            setProgressoCapitulos(merged.progressoCapitulos);
+            setVersiculosMarcados(merged.versiculosMarcados);
+            if (merged.planoAtivo) setPlanoAtivo(merged.planoAtivo);
+            if (merged.registrosAtividade) setRegistrosAtividade(merged.registrosAtividade);
 
-          // Garante que a nuvem tenha a soma completa de celular + computador
-          await saveUserDataToFirestore(user.uid, merged);
-          setSyncStatusNuvem('synced');
-          setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 400);
+            // Garante que a nuvem tenha a soma completa de celular + computador
+            const saveRes = await saveUserDataToFirestore(user.uid, merged);
+            if (saveRes?.sucesso) {
+              setSyncStatusNuvem('synced');
+            } else {
+              setSyncStatusNuvem('error');
+              console.warn('Erro ao salvar no Firestore:', saveRes?.erro);
+            }
+            setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 400);
+          }
         } catch (e) {
           console.error('Erro na sincronização inicial do Firebase:', e);
           setSyncStatusNuvem('error');

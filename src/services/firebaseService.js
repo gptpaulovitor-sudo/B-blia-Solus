@@ -144,37 +144,40 @@ export function subscribeAuthState(onUserChanged) {
 
 export async function saveUserDataToFirestore(uid, data) {
   try {
-    if (!uid) return false;
+    if (!uid) return { sucesso: false, erro: 'UID não fornecido' };
     const { db } = getFirebaseInstances();
-    if (!db) return false;
+    if (!db) return { sucesso: false, erro: 'Instância do Firestore não inicializada' };
+
+    // Remove qualquer propriedade undefined para evitar erro nativo do Firestore
+    const sanitized = JSON.parse(JSON.stringify(data || {}));
 
     const userDocRef = doc(db, 'usuarios', uid);
     await setDoc(userDocRef, {
-      ...data,
+      ...sanitized,
       atualizadoEm: serverTimestamp()
     }, { merge: true });
-    return true;
+    return { sucesso: true, erro: null };
   } catch (err) {
     console.error('Erro ao salvar dados no Firestore:', err);
-    return false;
+    return { sucesso: false, erro: err.message || err.code || String(err) };
   }
 }
 
 export async function loadUserDataFromFirestore(uid) {
   try {
-    if (!uid) return null;
+    if (!uid) return { dados: null, erro: 'UID não fornecido' };
     const { db } = getFirebaseInstances();
-    if (!db) return null;
+    if (!db) return { dados: null, erro: 'Instância do Firestore não inicializada' };
 
     const userDocRef = doc(db, 'usuarios', uid);
     const snap = await getDoc(userDocRef);
     if (snap.exists()) {
-      return snap.data();
+      return { dados: snap.data(), erro: null };
     }
-    return null;
+    return { dados: null, erro: null };
   } catch (err) {
     console.error('Erro ao carregar dados do Firestore:', err);
-    return null;
+    return { dados: null, erro: err.message || err.code || String(err) };
   }
 }
 
