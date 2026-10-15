@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import { 
   getFirestore, 
+  initializeFirestore,
   doc, 
   getDoc, 
   setDoc,
@@ -72,7 +73,13 @@ export function getFirebaseInstances() {
       firebaseAppInstance = getApp();
     }
     firebaseAuthInstance = getAuth(firebaseAppInstance);
-    firebaseDbInstance = getFirestore(firebaseAppInstance);
+    try {
+      firebaseDbInstance = initializeFirestore(firebaseAppInstance, {
+        experimentalAutoDetectLongPolling: true
+      });
+    } catch (e) {
+      firebaseDbInstance = getFirestore(firebaseAppInstance);
+    }
     return { app: firebaseAppInstance, auth: firebaseAuthInstance, db: firebaseDbInstance };
   } catch (err) {
     console.error('Falha ao inicializar o Firebase:', err);

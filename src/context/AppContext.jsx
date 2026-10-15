@@ -54,6 +54,7 @@ export function AppProvider({ children }) {
   // Usuário e sincronização em Nuvem (Google Firebase)
   const [usuarioGoogle, setUsuarioGoogle] = useState(null);
   const [syncStatusNuvem, setSyncStatusNuvem] = useState('idle'); // 'idle' | 'syncing' | 'synced' | 'error'
+  const [syncErrorMessage, setSyncErrorMessage] = useState('');
 
   // Inicializar serviços nativos do dispositivo (Botão Voltar, Splash Screen)
   useEffect(() => {
@@ -536,6 +537,7 @@ export function AppProvider({ children }) {
           const cloudRes = await loadUserDataFromFirestore(user.uid);
           if (cloudRes?.erro) {
             console.warn('Erro ao carregar dados do Firestore:', cloudRes.erro);
+            setSyncErrorMessage(cloudRes.erro);
             setSyncStatusNuvem('error');
           } else {
             const cloudData = cloudRes?.dados;
@@ -564,8 +566,10 @@ export function AppProvider({ children }) {
             // Garante que a nuvem tenha a soma completa de celular + computador
             const saveRes = await saveUserDataToFirestore(user.uid, merged);
             if (saveRes?.sucesso) {
+              setSyncErrorMessage('');
               setSyncStatusNuvem('synced');
             } else {
+              setSyncErrorMessage(saveRes?.erro || 'Erro ao gravar dados no Firestore');
               setSyncStatusNuvem('error');
               console.warn('Erro ao salvar no Firestore:', saveRes?.erro);
             }
@@ -573,6 +577,7 @@ export function AppProvider({ children }) {
           }
         } catch (e) {
           console.error('Erro na sincronização inicial do Firebase:', e);
+          setSyncErrorMessage(e.message || String(e));
           setSyncStatusNuvem('error');
           isUpdatingFromCloudRef.current = false;
         }
@@ -664,15 +669,18 @@ export function AppProvider({ children }) {
       };
       const res = await saveUserDataToFirestore(usuarioGoogle.uid, payload);
       if (res?.sucesso) {
+        setSyncErrorMessage('');
         setSyncStatusNuvem('synced');
         if (manual) showToast('Sincronizado com a nuvem com sucesso!');
       } else {
+        setSyncErrorMessage(res?.erro || 'Permissão negada ou falha de escrita no Firestore');
         setSyncStatusNuvem('error');
         console.warn('Erro ao salvar no Firestore:', res?.erro);
         if (manual) showToast(`Erro ao gravar na nuvem: ${res?.erro || 'Permissão negada no Firestore'}`);
       }
     } catch (e) {
       console.error('Erro ao sincronizar com nuvem:', e);
+      setSyncErrorMessage(e.message || String(e));
       setSyncStatusNuvem('error');
       if (manual) showToast('Erro de conexão ao sincronizar com nuvem.');
     }
@@ -761,6 +769,7 @@ export function AppProvider({ children }) {
         recarregarTudoDoStorage,
         usuarioGoogle,
         syncStatusNuvem,
+        syncErrorMessage,
         loginGoogle,
         loginEmail,
         logoutGoogle,

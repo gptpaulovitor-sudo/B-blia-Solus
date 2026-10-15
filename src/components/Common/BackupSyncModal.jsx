@@ -31,6 +31,7 @@ export default function BackupSyncModal({ isOpen, onClose, initialTab = 'cloud' 
     showToast,
     usuarioGoogle,
     syncStatusNuvem,
+    syncErrorMessage,
     loginGoogle,
     loginEmail,
     logoutGoogle,
@@ -339,7 +340,7 @@ export default function BackupSyncModal({ isOpen, onClose, initialTab = 'cloud' 
                         {syncStatusNuvem === 'syncing' 
                           ? 'Sincronizando com a Nuvem...' 
                           : syncStatusNuvem === 'error' 
-                            ? 'Aguardando liberação de escrita no Firestore' 
+                            ? (syncErrorMessage ? `Erro: ${syncErrorMessage}` : 'Aguardando liberação de escrita no Firestore') 
                             : 'Progresso sincronizado em tempo real na nuvem'}
                       </span>
                     </div>
@@ -362,6 +363,12 @@ export default function BackupSyncModal({ isOpen, onClose, initialTab = 'cloud' 
                           <span>🔄 Tocar Aqui para Sincronizar Agora</span>
                         </button>
                       </div>
+
+                      {syncErrorMessage && (
+                        <div className="p-2.5 rounded-xl bg-amber-100/90 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700 text-[11px] font-mono break-all text-amber-950 dark:text-amber-100">
+                          <strong>Resposta do Firebase:</strong> {syncErrorMessage}
+                        </div>
+                      )}
 
                       <p className="text-[11px] leading-relaxed">
                         Se você acabou de salvar as regras no Firebase, toque no botão verde acima para confirmar a conexão com a nuvem!
