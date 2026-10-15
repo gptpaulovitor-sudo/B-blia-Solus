@@ -546,7 +546,7 @@ export function AppProvider({ children }) {
               versiculosMarcados: storageService.getVersiculosMarcados(),
               planoAtivo: storageService.getPlanoAtivo(),
               registrosAtividade: storageService.getRegistrosAtividade(),
-              ofensivaDias: storageService.getOfensivaDias()
+              ofensivaDias: calcularOfensivaDias(storageService.getRegistrosAtividade())
             };
 
             const merged = mergeUserData(localData, cloudData);
@@ -556,7 +556,6 @@ export function AppProvider({ children }) {
             storageService.saveVersiculosMarcados(merged.versiculosMarcados);
             if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
             if (merged.registrosAtividade) storageService.saveRegistrosAtividade(merged.registrosAtividade);
-            storageService.saveOfensivaDias(merged.ofensivaDias);
 
             setProgressoCapitulos(merged.progressoCapitulos);
             setVersiculosMarcados(merged.versiculosMarcados);
@@ -664,7 +663,7 @@ export function AppProvider({ children }) {
         versiculosMarcados: storageService.getVersiculosMarcados(),
         planoAtivo: storageService.getPlanoAtivo(),
         registrosAtividade: storageService.getRegistrosAtividade(),
-        ofensivaDias: storageService.getOfensivaDias(),
+        ofensivaDias: calcularOfensivaDias(storageService.getRegistrosAtividade()),
         ...dadosExtras
       };
       const res = await saveUserDataToFirestore(usuarioGoogle.uid, payload);

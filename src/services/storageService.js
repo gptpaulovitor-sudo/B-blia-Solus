@@ -245,6 +245,14 @@ export const storageService = {
     }
   },
 
+  getOfensivaDias() {
+    return 0;
+  },
+
+  saveOfensivaDias(dias) {
+    // Stub defensivo
+  },
+
   // Exportar todos os dados salvos em um formato JSON completo
   exportarTodosDados() {
     try {
