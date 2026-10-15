@@ -1,5 +1,5 @@
 // Solus Christus PWA Service Worker - Gold & Obsidian Edition
-const CACHE_NAME = 'solus-christus-v7-fix';
+const CACHE_NAME = 'solus-christus-v8-sync';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
