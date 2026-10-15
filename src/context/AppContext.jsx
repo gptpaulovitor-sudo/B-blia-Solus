@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { storageService } from '../services/storageService';
 import { getCapituloVersiculos, LIVROS_BIBLIA } from '../data/bibliaACF';
 import { getComentarioCapitulo } from '../data/comentariosEstudo';
@@ -6,6 +6,7 @@ import { calcularPlanoPersonalizado } from '../services/planCalculator';
 import { nativeService } from '../services/nativeService';
 import {
   subscribeAuthState,
+  subscribeCloudUserData,
   loginWithGoogle,
   loginWithEmail,
   registerWithEmail,
@@ -513,64 +514,137 @@ export function AppProvider({ children }) {
     return recuperou;
   };
 
-  // Observador de Autenticação Firebase (Nuvem Google)
+  // Flag para evitar loops de reenvio quando os dados chegam da nuvem
+  const isUpdatingFromCloudRef = useRef(false);
+
+  // Observador de Autenticação e Ouvinte em Tempo Real do Firebase (Nuvem Google)
   useEffect(() => {
-    const unsub = subscribeAuthState(async (user) => {
+    let cloudUnsub = null;
+
+    const authUnsub = subscribeAuthState(async (user) => {
       setUsuarioGoogle(user);
+      if (cloudUnsub) {
+        cloudUnsub();
+        cloudUnsub = null;
+      }
+
       if (user) {
         setSyncStatusNuvem('syncing');
+
+        // 1. Carga inicial e mesclagem bidirecional (sem perda de capítulos ou notas)
         try {
           const cloudData = await loadUserDataFromFirestore(user.uid);
-          if (cloudData) {
-            const localData = {
-              progressoCapitulos: storageService.getProgressoCapitulos(),
-              versiculosMarcados: storageService.getVersiculosMarcados(),
-              planoAtivo: storageService.getPlanoAtivo(),
-              ofensivaDias: storageService.getOfensivaDias()
-            };
-            const merged = mergeUserData(localData, cloudData);
+          const localData = {
+            progressoCapitulos: storageService.getProgressoCapitulos(),
+            versiculosMarcados: storageService.getVersiculosMarcados(),
+            planoAtivo: storageService.getPlanoAtivo(),
+            registrosAtividade: storageService.getRegistrosAtividade(),
+            ofensivaDias: storageService.getOfensivaDias()
+          };
 
-            storageService.saveProgressoCapitulos(merged.progressoCapitulos);
-            storageService.saveVersiculosMarcados(merged.versiculosMarcados);
-            if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
-            storageService.saveOfensivaDias(merged.ofensivaDias);
+          const merged = mergeUserData(localData, cloudData);
 
-            await saveUserDataToFirestore(user.uid, merged);
+          isUpdatingFromCloudRef.current = true;
+          storageService.saveProgressoCapitulos(merged.progressoCapitulos);
+          storageService.saveVersiculosMarcados(merged.versiculosMarcados);
+          if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
+          if (merged.registrosAtividade) storageService.saveRegistrosAtividade(merged.registrosAtividade);
+          storageService.saveOfensivaDias(merged.ofensivaDias);
 
-            setProgressoCapitulos(merged.progressoCapitulos);
-            setVersiculosMarcados(merged.versiculosMarcados);
-            if (merged.planoAtivo) setPlanoAtivo(merged.planoAtivo);
-          } else {
-            const localData = {
-              progressoCapitulos: storageService.getProgressoCapitulos(),
-              versiculosMarcados: storageService.getVersiculosMarcados(),
-              planoAtivo: storageService.getPlanoAtivo(),
-              ofensivaDias: storageService.getOfensivaDias()
-            };
-            await saveUserDataToFirestore(user.uid, localData);
-          }
+          setProgressoCapitulos(merged.progressoCapitulos);
+          setVersiculosMarcados(merged.versiculosMarcados);
+          if (merged.planoAtivo) setPlanoAtivo(merged.planoAtivo);
+          if (merged.registrosAtividade) setRegistrosAtividade(merged.registrosAtividade);
+
+          // Garante que a nuvem tenha a soma completa de celular + computador
+          await saveUserDataToFirestore(user.uid, merged);
           setSyncStatusNuvem('synced');
+          setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 400);
         } catch (e) {
           console.error('Erro na sincronização inicial do Firebase:', e);
           setSyncStatusNuvem('error');
+          isUpdatingFromCloudRef.current = false;
         }
+
+        // 2. Ouvinte em tempo real (onSnapshot): atualizações feitas no celular aparecem no computador e vice-versa
+        cloudUnsub = subscribeCloudUserData(user.uid, (cloudData, hasPendingWrites) => {
+          if (hasPendingWrites || !cloudData) return;
+
+          setSyncStatusNuvem('syncing');
+          isUpdatingFromCloudRef.current = true;
+
+          if (cloudData.progressoCapitulos) {
+            setProgressoCapitulos(prev => {
+              const updated = { ...prev, ...cloudData.progressoCapitulos };
+              storageService.saveProgressoCapitulos(updated);
+              return updated;
+            });
+          }
+
+          if (Array.isArray(cloudData.versiculosMarcados)) {
+            setVersiculosMarcados(prev => {
+              const map = new Map();
+              (cloudData.versiculosMarcados || []).forEach(v => {
+                if (v && (v.id || v.versiculo)) {
+                  const chave = v.id || `v_${v.livroId}_${v.capitulo}_${v.versiculo}`;
+                  map.set(chave, { ...v, id: chave });
+                }
+              });
+              (prev || []).forEach(v => {
+                if (v && (v.id || v.versiculo)) {
+                  const chave = v.id || `v_${v.livroId}_${v.capitulo}_${v.versiculo}`;
+                  if (map.has(chave)) {
+                    const c = map.get(chave);
+                    const nota = (v.nota && v.nota.trim()) ? v.nota : (c.nota || '');
+                    map.set(chave, { ...c, ...v, id: chave, nota });
+                  } else {
+                    map.set(chave, { ...v, id: chave });
+                  }
+                }
+              });
+              const uniao = Array.from(map.values());
+              storageService.saveVersiculosMarcados(uniao);
+              return uniao;
+            });
+          }
+
+          if (cloudData.planoAtivo !== undefined) {
+            setPlanoAtivo(cloudData.planoAtivo);
+            storageService.savePlanoAtivo(cloudData.planoAtivo);
+          }
+
+          if (cloudData.registrosAtividade) {
+            setRegistrosAtividade(prev => {
+              const updated = { ...prev, ...cloudData.registrosAtividade };
+              storageService.saveRegistrosAtividade(updated);
+              return updated;
+            });
+          }
+
+          setSyncStatusNuvem('synced');
+          setTimeout(() => { isUpdatingFromCloudRef.current = false; }, 400);
+        });
       } else {
         setSyncStatusNuvem('idle');
       }
     });
 
-    return () => unsub && unsub();
+    return () => {
+      authUnsub && authUnsub();
+      cloudUnsub && cloudUnsub();
+    };
   }, []);
 
   // Enviar alterações para a nuvem automaticamente quando o usuário estiver logado
   const sincronizarComNuvem = async (dadosExtras = {}) => {
-    if (!usuarioGoogle?.uid) return;
+    if (!usuarioGoogle?.uid || isUpdatingFromCloudRef.current) return;
     setSyncStatusNuvem('syncing');
     try {
       const payload = {
         progressoCapitulos: storageService.getProgressoCapitulos(),
         versiculosMarcados: storageService.getVersiculosMarcados(),
         planoAtivo: storageService.getPlanoAtivo(),
+        registrosAtividade: storageService.getRegistrosAtividade(),
         ofensivaDias: storageService.getOfensivaDias(),
         ...dadosExtras
       };

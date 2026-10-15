@@ -14,7 +14,8 @@ import {
   doc, 
   getDoc, 
   setDoc,
-  serverTimestamp 
+  serverTimestamp,
+  onSnapshot
 } from 'firebase/firestore';
 
 const DEFAULT_FIREBASE_CONFIG = {
@@ -178,38 +179,68 @@ export async function loadUserDataFromFirestore(uid) {
 }
 
 /**
+ * Ouvinte em tempo real via onSnapshot do Cloud Firestore
+ * Garante que qualquer alteração no celular reflita no computador e vice-versa instantaneamente
+ */
+export function subscribeCloudUserData(uid, onData, onError) {
+  try {
+    if (!uid) return () => {};
+    const { db } = getFirebaseInstances();
+    if (!db) return () => {};
+
+    const userDocRef = doc(db, 'usuarios', uid);
+    return onSnapshot(userDocRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        onData(data, snap.metadata?.hasPendingWrites || false);
+      }
+    }, (err) => {
+      console.warn('Observador do Firestore offline ou erro:', err);
+      if (onError) onError(err);
+    });
+  } catch (e) {
+    console.error('Falha ao registrar observador onSnapshot:', e);
+    return () => {};
+  }
+}
+
+/**
  * Mescla dados locais e nuvem de forma inteligente e segura (sem perda de leitura ou notas).
  */
-export function mergeUserData(local, cloud) {
-  if (!cloud) return local;
-  if (!local) return cloud;
+export function mergeUserData(local = {}, cloud = {}) {
+  const localProg = local.progressoCapitulos || {};
+  const cloudProg = cloud.progressoCapitulos || {};
+  const progressoCapitulos = { ...cloudProg, ...localProg };
 
-  // 1. Capítulos lidos: união simples
-  const progressoCapitulos = {
-    ...(cloud.progressoCapitulos || {}),
-    ...(local.progressoCapitulos || {})
-  };
-
-  // 2. Versículos marcados: união por ID
+  // Versículos Marcados: união inteligente por ID
   const mapVersiculos = new Map();
-  (cloud.versiculosMarcados || []).forEach(item => {
-    if (item && item.id) mapVersiculos.set(item.id, item);
+  const cloudMarcados = Array.isArray(cloud.versiculosMarcados) ? cloud.versiculosMarcados : [];
+  const localMarcados = Array.isArray(local.versiculosMarcados) ? local.versiculosMarcados : [];
+
+  cloudMarcados.forEach(item => {
+    if (item && (item.id || item.versiculo)) {
+      const chave = item.id || `v_${item.livroId}_${item.capitulo}_${item.versiculo}`;
+      mapVersiculos.set(chave, { ...item, id: chave });
+    }
   });
-  (local.versiculosMarcados || []).forEach(item => {
-    if (item && item.id) {
-      const existing = mapVersiculos.get(item.id);
-      if (existing) {
-        // Preserva anotação mais recente ou não vazia
-        const nota = (item.nota && item.nota.trim()) ? item.nota : existing.nota;
-        const cor = item.cor || existing.cor;
-        mapVersiculos.set(item.id, { ...existing, ...item, nota, cor });
+
+  localMarcados.forEach(item => {
+    if (item && (item.id || item.versiculo)) {
+      const chave = item.id || `v_${item.livroId}_${item.capitulo}_${item.versiculo}`;
+      if (mapVersiculos.has(chave)) {
+        const cloudItem = mapVersiculos.get(chave);
+        // Preserva a nota se qualquer um dos lados tiver preenchido
+        const nota = (item.nota && item.nota.trim() !== '') ? item.nota : (cloudItem.nota || '');
+        const cor = item.cor || cloudItem.cor;
+        const data = (item.data && (!cloudItem.data || item.data > cloudItem.data)) ? item.data : (cloudItem.data || item.data);
+        mapVersiculos.set(chave, { ...cloudItem, ...item, id: chave, nota, cor, data });
       } else {
-        mapVersiculos.set(item.id, item);
+        mapVersiculos.set(chave, { ...item, id: chave });
       }
     }
   });
 
-  // 3. Plano Ativo: mesclar progresso de dias
+  // Plano Ativo: mesclar progresso de dias
   let planoAtivo = local.planoAtivo || cloud.planoAtivo || null;
   if (local.planoAtivo && cloud.planoAtivo && local.planoAtivo.id === cloud.planoAtivo.id) {
     planoAtivo = {
@@ -222,13 +253,18 @@ export function mergeUserData(local, cloud) {
     };
   }
 
-  // 4. Ofensiva: maior valor entre local e nuvem
+  // Registros de atividade & Ofensiva
+  const registrosAtividade = {
+    ...(cloud.registrosAtividade || {}),
+    ...(local.registrosAtividade || {})
+  };
   const ofensivaDias = Math.max(local.ofensivaDias || 0, cloud.ofensivaDias || 0);
 
   return {
     progressoCapitulos,
     versiculosMarcados: Array.from(mapVersiculos.values()),
     planoAtivo,
+    registrosAtividade,
     ofensivaDias
   };
 }
