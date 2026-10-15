@@ -33,7 +33,8 @@ export default function ProfileView() {
     marcarLivrosComoLidos,
     planoAtivo,
     setActiveTab,
-    ofensivaDias
+    ofensivaDias,
+    setSelectedVerseModal
   } = useApp();
 
   const [activeFilterColor, setActiveFilterColor] = useState('all'); // all | yellow | green | blue | pink | notes
@@ -199,14 +200,21 @@ export default function ProfileView() {
             <p class="text-xs md:text-sm text-[#6B6357] dark:text-[#A39D90] mt-0.5 font-sans">
               Medidores de leitura, progresso dos planos, destaques e anotações de estudo profundo & prática diária.
             </p>
-            <div class="mt-3">
+            <div class="mt-3 flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setIsBackupModalOpen(true)}
-                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#9E7418] dark:bg-[#D4AF37] hover:opacity-95 text-white font-bold text-xs shadow-sm transition-all active:scale-95"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#9E7418] dark:bg-[#D4AF37] hover:opacity-95 text-white font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
               >
                 <HardDrive class="w-3.5 h-3.5" />
                 <span>Sincronização & Backup</span>
               </button>
+              <a
+                href="#caderno-de-anotacoes"
+                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-[#9E7418] dark:text-[#D4AF37] border border-[#9E7418]/30 font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
+              >
+                <NotebookPen class="w-3.5 h-3.5" />
+                <span>Ver Anotações ({totalNotasPessoais})</span>
+              </a>
             </div>
           </div>
         </div>
@@ -514,7 +522,7 @@ export default function ProfileView() {
       </section>
 
       {/* Main Saved Verses & Notes Feed */}
-      <div class="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-6">
+      <div id="caderno-de-anotacoes" class="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-6">
         
         {/* Filter Controls Bar */}
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-stone-100 dark:border-stone-800">
@@ -649,6 +657,21 @@ export default function ProfileView() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedVerseModal({
+                          livroId: item.livroId,
+                          capitulo: item.capitulo,
+                          versiculo: listaVers[0],
+                          versiculos: listaVers,
+                          texto: textoCombinado
+                        })}
+                        className="flex items-center gap-1 text-xs font-semibold text-[#9E7418] dark:text-[#D4AF37] hover:underline cursor-pointer"
+                        title="Editar anotação"
+                      >
+                        <NotebookPen className="w-3.5 h-3.5" />
+                        <span>Editar</span>
+                      </button>
+
                       <button
                         onClick={() => irParaCapitulo(item.livroId, item.capitulo)}
                         className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"

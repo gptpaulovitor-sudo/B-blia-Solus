@@ -267,7 +267,9 @@ export function AppProvider({ children }) {
     const capNum = Number(capitulo);
     const listaVersiculos = Array.isArray(versiculos) && versiculos.length > 0
       ? [...new Set(versiculos.map(Number))].sort((a, b) => a - b)
-      : [Number(versiculo)];
+      : (versiculo !== undefined && versiculo !== null ? [Number(versiculo)] : []);
+
+    if (listaVersiculos.length === 0) return;
 
     const dataAtual = new Date().toISOString();
     const grupoId = listaVersiculos.length > 1
@@ -275,8 +277,9 @@ export function AppProvider({ children }) {
       : null;
 
     let atualizados = [...versiculosMarcados];
+    const notaLimpa = (nota || '').trim();
 
-    if (!cor && (!nota || nota.trim() === '')) {
+    if (!cor && notaLimpa === '') {
       // Remover os versículos selecionados
       atualizados = atualizados.filter(v => {
         const mesmoCap = v.livroId === livroId && Number(v.capitulo) === capNum;
@@ -290,6 +293,8 @@ export function AppProvider({ children }) {
           v => v.id === id || (v.livroId === livroId && Number(v.capitulo) === capNum && Number(v.versiculo) === vNum)
         );
 
+        const itemAntigo = index >= 0 ? atualizados[index] : null;
+
         const novoItem = {
           id,
           livroId,
@@ -297,8 +302,8 @@ export function AppProvider({ children }) {
           versiculo: vNum,
           versiculos: listaVersiculos,
           grupoId,
-          cor: cor !== undefined ? cor : (index >= 0 ? atualizados[index].cor : null),
-          nota: nota !== undefined ? nota : (index >= 0 ? atualizados[index].nota : ''),
+          cor: cor !== undefined ? cor : (itemAntigo ? itemAntigo.cor : null),
+          nota: nota !== undefined ? (nota || '') : (itemAntigo ? itemAntigo.nota : ''),
           data: dataAtual
         };
 
@@ -313,7 +318,7 @@ export function AppProvider({ children }) {
       showToast(
         listaVersiculos.length > 1
           ? `Anotação salva para ${listaVersiculos.length} versículos!`
-          : (nota && nota.trim() !== '' ? 'Anotação salva com sucesso!' : 'Versículo destacado com sucesso!')
+          : (notaLimpa !== '' ? 'Anotação salva com sucesso!' : 'Versículo destacado com sucesso!')
       );
     }
 

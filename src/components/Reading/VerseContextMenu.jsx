@@ -14,18 +14,14 @@ import {
 import { LIVROS_BIBLIA, getCapituloVersiculos } from '../../data/bibliaACF';
 import { formatarIntervalosVersiculos } from '../../utils/bibleHelpers';
 
-export default function VerseContextMenu() {
+function VerseContextMenuModal({ selectedVerseModal, onClose }) {
   const { 
-    selectedVerseModal, 
-    setSelectedVerseModal, 
     salvarVersiculoMarcado, 
     removerVersiculoMarcado,
     versiculosMarcados, 
     showToast, 
     registrarAtividadeHoje
   } = useApp();
-
-  if (!selectedVerseModal) return null;
 
   const { livroId, capitulo, versiculo, versiculos } = selectedVerseModal;
   const livroObj = LIVROS_BIBLIA.find(l => l.id === livroId) || { nome: livroId };
@@ -39,10 +35,12 @@ export default function VerseContextMenu() {
 
   // Buscar se o versículo de clique já possui anotação ou vínculo de múltiplos versículos
   const idVersiculo = `v_${livroId}_${capitulo}_${versiculo}`;
-  const versiculoExistente = versiculosMarcados.find(v => 
-    v.id === idVersiculo || 
-    (v.livroId === livroId && Number(v.capitulo) === Number(capitulo) && Number(v.versiculo) === Number(versiculo))
-  );
+  const versiculoExistente = useMemo(() => {
+    return (versiculosMarcados || []).find(v => 
+      v.id === idVersiculo || 
+      (v.livroId === livroId && Number(v.capitulo) === Number(capitulo) && Number(v.versiculo) === Number(versiculo))
+    );
+  }, [versiculosMarcados, idVersiculo, livroId, capitulo, versiculo]);
 
   // Inicializar versículos selecionados
   const initialVerses = useMemo(() => {
@@ -60,17 +58,6 @@ export default function VerseContextMenu() {
   const [notaTexto, setNotaTexto] = useState(versiculoExistente?.nota || '');
   const [isCopied, setIsCopied] = useState(false);
   const [showAllChips, setShowAllChips] = useState(false);
-
-  useEffect(() => {
-    setSelectedVerses(initialVerses);
-    if (versiculoExistente) {
-      setSelectedColor(versiculoExistente.cor || null);
-      setNotaTexto(versiculoExistente.nota || '');
-    } else {
-      setSelectedColor(null);
-      setNotaTexto('');
-    }
-  }, [selectedVerseModal]);
 
   const coresDestaque = [
     { id: 'yellow', label: 'Amarelo', bg: 'bg-yellow-200 dark:bg-yellow-600/50 border-yellow-400' },
@@ -121,10 +108,12 @@ export default function VerseContextMenu() {
     salvarVersiculoMarcado({
       livroId,
       capitulo,
+      versiculo: Number(versiculo),
       versiculos: selectedVerses,
       cor: selectedColor,
       nota: notaTexto
     });
+    onClose();
   };
 
   const handleCopy = () => {
@@ -137,11 +126,14 @@ export default function VerseContextMenu() {
 
   const handleDelete = () => {
     removerVersiculoMarcado(livroId, capitulo, selectedVerses);
-    setSelectedVerseModal(null);
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+      onClick={onClose}
+    >
       <div 
         className="w-full max-w-lg bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl p-5 sm:p-6 overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
@@ -164,7 +156,7 @@ export default function VerseContextMenu() {
             </h3>
           </div>
           <button
-            onClick={() => setSelectedVerseModal(null)}
+            onClick={onClose}
             className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -331,6 +323,7 @@ export default function VerseContextMenu() {
                 return (
                   <button
                     key={cor.id}
+                    type="button"
                     onClick={() => setSelectedColor(isSelected ? null : cor.id)}
                     className={`flex-1 py-2.5 rounded-xl border-2 transition-all flex items-center justify-center gap-1 text-xs font-medium ${cor.bg} ${
                       isSelected ? 'ring-2 ring-amber-500 scale-105 shadow-sm' : 'opacity-80 hover:opacity-100'
@@ -344,6 +337,7 @@ export default function VerseContextMenu() {
 
               {selectedColor && (
                 <button
+                  type="button"
                   onClick={() => setSelectedColor(null)}
                   title="Remover cor"
                   className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-red-500 transition-colors"
@@ -361,11 +355,11 @@ export default function VerseContextMenu() {
                 <NotebookPen className="w-4 h-4 text-[#9E7418] dark:text-[#D4AF37]" />
                 <span>Explicação & Anotação Pessoal</span>
               </label>
-              <span className="text-[11px] text-stone-400">Salva na aba Disciplina</span>
+              <span className="text-[11px] text-stone-400">Salva no Caderno de Disciplina</span>
             </div>
             <textarea
-              rows={3}
-              placeholder="Escreva sua reflexão, estudo ou explicação abrangendo estes versículos..."
+              rows={4}
+              placeholder="Escreva sua reflexão, estudo ou explicação espiritual para estes versículos..."
               value={notaTexto}
               onChange={(e) => setNotaTexto(e.target.value)}
               className="w-full p-3.5 rounded-2xl bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-700 text-sm text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#9E7418] dark:focus:ring-[#D4AF37] resize-none font-sans"
@@ -377,6 +371,7 @@ export default function VerseContextMenu() {
         <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-semibold transition-colors"
             >
@@ -386,6 +381,7 @@ export default function VerseContextMenu() {
 
             {(versiculoExistente || selectedColor || notaTexto) && (
               <button
+                type="button"
                 onClick={handleDelete}
                 title="Excluir anotação e destaques"
                 className="p-2 rounded-xl text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
@@ -397,12 +393,14 @@ export default function VerseContextMenu() {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setSelectedVerseModal(null)}
+              type="button"
+              onClick={onClose}
               className="px-3.5 py-2 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-semibold transition-colors"
             >
               Cancelar
             </button>
             <button
+              type="button"
               onClick={handleSave}
               className="px-4 py-2.5 rounded-xl bg-[#9E7418] hover:bg-[#855F0E] dark:bg-[#C59B27] dark:hover:bg-[#D4AF37] text-white dark:text-[#0E0E12] text-xs font-bold shadow-md transition-all scale-100 active:scale-95"
             >
@@ -412,5 +410,18 @@ export default function VerseContextMenu() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerseContextMenu() {
+  const { selectedVerseModal, setSelectedVerseModal } = useApp();
+
+  if (!selectedVerseModal) return null;
+
+  return (
+    <VerseContextMenuModal
+      selectedVerseModal={selectedVerseModal}
+      onClose={() => setSelectedVerseModal(null)}
+    />
   );
 }

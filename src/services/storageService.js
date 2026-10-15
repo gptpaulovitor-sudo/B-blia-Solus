@@ -115,29 +115,36 @@ export const storageService = {
   getVersiculosMarcados() {
     try {
       let data = localStorage.getItem(KEYS.VERSICULOS_MARCADOS);
-      let parsed = data ? JSON.parse(data) : null;
+      if (data !== null) {
+        let parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [];
+      }
 
-      // Fallback para chave legada se a atual estiver vazia
-      if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-        const legacyData = localStorage.getItem(LEGACY_KEYS.VERSICULOS_MARCADOS);
-        if (legacyData) {
+      // Migração única inicial da chave legada apenas se a chave atual nunca foi gravada (null)
+      const legacyData = localStorage.getItem(LEGACY_KEYS.VERSICULOS_MARCADOS);
+      if (legacyData) {
+        try {
           const legacyParsed = JSON.parse(legacyData);
           if (Array.isArray(legacyParsed) && legacyParsed.length > 0) {
-            parsed = legacyParsed;
-            localStorage.setItem(KEYS.VERSICULOS_MARCADOS, JSON.stringify(parsed));
+            localStorage.setItem(KEYS.VERSICULOS_MARCADOS, JSON.stringify(legacyParsed));
+            return legacyParsed;
           }
-        }
+        } catch (err) {}
       }
-      return Array.isArray(parsed) ? parsed : [];
+      return [];
     } catch (e) {
+      console.error('Erro ao ler versiculos marcados do localStorage:', e);
       return [];
     }
   },
   saveVersiculosMarcados(versiculos) {
     try {
-      localStorage.setItem(KEYS.VERSICULOS_MARCADOS, JSON.stringify(versiculos));
+      const json = JSON.stringify(versiculos || []);
+      localStorage.setItem(KEYS.VERSICULOS_MARCADOS, json);
+      // Mantém chave legada sincronizada em paralelo para evitar dessincronização
+      localStorage.setItem(LEGACY_KEYS.VERSICULOS_MARCADOS, json);
     } catch (e) {
-      console.error(e);
+      console.error('Erro ao salvar versiculos marcados no localStorage:', e);
     }
   },
 

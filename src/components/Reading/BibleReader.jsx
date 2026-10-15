@@ -257,46 +257,77 @@ export default function BibleReader() {
         >
           {versiculosAtuais.map((item) => {
             const idVersiculo = `v_${posicao.livroId}_${posicao.capitulo}_${item.v}`;
-            const marcacao = versiculosMarcados.find(v => 
+            const marcacao = (versiculosMarcados || []).find(v => 
               v.id === idVersiculo || 
               (v.livroId === posicao.livroId && Number(v.capitulo) === Number(posicao.capitulo) && Number(v.versiculo) === Number(item.v))
             );
             const highlightClass = marcacao?.cor ? `highlight-${marcacao.cor}` : '';
-            const temNota = !!marcacao?.nota;
+            const temNota = !!marcacao?.nota && marcacao.nota.trim() !== '';
             const isSelected = selectedVerses.includes(Number(item.v));
 
+            // Verificar se deve exibir o cartão de anotação neste versículo (no último versículo do grupo para não duplicar)
+            const listaVersDoGrupo = marcacao?.versiculos && Array.isArray(marcacao.versiculos) && marcacao.versiculos.length > 0
+              ? marcacao.versiculos.map(Number)
+              : [Number(item.v)];
+            const maxVDoGrupo = Math.max(...listaVersDoGrupo);
+            const deveExibirCardAnotacao = temNota && Number(item.v) === maxVDoGrupo;
+
             return (
-              <div key={item.v} className="group relative inline">
-                <span
-                  onClick={() => handleVerseClick(item, marcacao)}
-                  className={`
-                    inline rounded-md px-1.5 py-0.5 cursor-pointer transition-all duration-150 text-stone-900 dark:text-zinc-100
-                    ${isSelected ? 'ring-2 ring-[#D4AF37] bg-amber-100 dark:bg-amber-950/80 font-medium' : 'hover:bg-amber-100/70 dark:hover:bg-amber-900/40'}
-                    ${highlightClass}
-                  `}
-                >
-                  {/* Verse Number Indicator */}
-                  <sup className="font-sans text-[12px] font-black text-[#9E7418] dark:text-[#D4AF37] mr-1.5 select-none">
-                    {item.v}
-                  </sup>
+              <React.Fragment key={item.v}>
+                <div className="group relative inline">
+                  <span
+                    onClick={() => handleVerseClick(item, marcacao)}
+                    className={`
+                      inline rounded-md px-1.5 py-0.5 cursor-pointer transition-all duration-150 text-stone-900 dark:text-zinc-100
+                      ${isSelected ? 'ring-2 ring-[#D4AF37] bg-amber-100 dark:bg-amber-950/80 font-medium' : 'hover:bg-amber-100/70 dark:hover:bg-amber-900/40'}
+                      ${highlightClass}
+                      ${temNota ? 'border-b-2 border-dotted border-[#9E7418] dark:border-[#D4AF37]' : ''}
+                    `}
+                  >
+                    {/* Verse Number Indicator */}
+                    <sup className="font-sans text-[12px] font-black text-[#9E7418] dark:text-[#D4AF37] mr-1.5 select-none">
+                      {item.v}
+                    </sup>
 
-                  <span>{item.t}</span>
+                    <span>{item.t}</span>
 
-                  {/* Personal Note Indicator */}
-                  {temNota && (
-                    <span 
-                      title={marcacao.versiculos && marcacao.versiculos.length > 1 
-                        ? `Nota compartilhada (v. ${formatarIntervalosVersiculos(marcacao.versiculos)}): ${marcacao.nota}` 
-                        : `Nota: ${marcacao.nota}`
-                      } 
-                      className="inline-flex items-center ml-1 text-[#9E7418] dark:text-[#D4AF37] align-baseline"
-                    >
-                      <NotebookPen className="w-3.5 h-3.5 inline" />
-                    </span>
-                  )}
-                </span>
-                {" "}
-              </div>
+                    {/* Personal Note Indicator */}
+                    {temNota && (
+                      <span 
+                        title={`Anotação: ${marcacao.nota}`}
+                        className="inline-flex items-center ml-1 text-[#9E7418] dark:text-[#D4AF37] align-baseline"
+                      >
+                        <NotebookPen className="w-3.5 h-3.5 inline" />
+                      </span>
+                    )}
+                  </span>
+                  {" "}
+                </div>
+
+                {/* Bloco de Anotação Pessoal no Texto */}
+                {deveExibirCardAnotacao && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVerseClick(item, marcacao);
+                    }}
+                    className="my-3 block p-3.5 sm:p-4 rounded-2xl bg-[#9E7418]/10 dark:bg-[#D4AF37]/10 border border-[#9E7418]/30 dark:border-[#D4AF37]/30 shadow-xs cursor-pointer hover:border-[#9E7418] dark:hover:border-[#D4AF37] transition-all group/note text-left not-italic font-sans"
+                  >
+                    <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-[#9E7418]/20 dark:border-[#D4AF37]/20">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#9E7418] dark:text-[#D4AF37]">
+                        <NotebookPen className="w-3.5 h-3.5 shrink-0" />
+                        <span>Minha Anotação • v. {listaVersDoGrupo.length > 1 ? formatarIntervalosVersiculos(listaVersDoGrupo) : item.v}</span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 group-hover/note:text-[#9E7418] dark:group-hover/note:text-[#D4AF37] transition-colors">
+                        Toque para editar ✍️
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed whitespace-pre-line font-sans">
+                      {marcacao.nota}
+                    </p>
+                  </div>
+                )}
+              </React.Fragment>
             );
           })}
         </div>

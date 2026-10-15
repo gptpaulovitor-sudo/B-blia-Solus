@@ -318,9 +318,6 @@ export default function HeaderSidebar() {
           </div>
         </div>
       )}
-          </div>
-        </div>
-      )}
     </>
   );
 }
