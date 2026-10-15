@@ -359,27 +359,34 @@ export default function BackupSyncModal({ isOpen, onClose, initialTab = 'cloud' 
                         <p className="font-bold text-amber-950 dark:text-amber-300">Como liberar a nuvem definitivamente:</p>
                         <p>1. Acesse <u>console.firebase.google.com</u> &gt; projeto <b>biblia-online-8bce0</b></p>
                         <p>2. Vá em <b>Firestore Database</b> &gt; aba <b>Regras (Rules)</b></p>
-                        <p>3. Permita escrita para usuários autenticados:</p>
-                        <pre className="p-1.5 bg-stone-100 dark:bg-stone-800 rounded font-mono text-[10px] select-all overflow-x-auto">
+                        <p>3. Substitua por esta regra (libera leitura e escrita):</p>
+                        <pre className="p-1.5 bg-stone-100 dark:bg-stone-800 rounded font-mono text-[10px] select-all overflow-x-auto text-amber-950 dark:text-amber-200">
 {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /usuarios/{userId} {
-      allow read, write: if request.auth != null;
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }`}
                         </pre>
+                        <p className="text-[10px] text-stone-500 dark:text-stone-400">4. Clique no botão azul <b>Publicar (Publish)</b> no Firebase Console.</p>
                       </div>
-                      <div className="pt-1 flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                          ⚡ Solução instantânea (sem esperar pelo Firebase):
-                        </span>
+                      <div className="pt-1 flex items-center justify-between gap-2 flex-wrap">
+                        <button
+                          onClick={() => sincronizarComNuvem({}, true)}
+                          disabled={syncStatusNuvem === 'syncing'}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${syncStatusNuvem === 'syncing' ? 'animate-spin' : ''}`} />
+                          <span>Testar / Sincronizar Agora</span>
+                        </button>
+
                         <button
                           onClick={() => setActiveTab('export')}
-                          className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-bold cursor-pointer transition-all"
+                          className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all"
                         >
-                          Ir para Exportar
+                          Exportar Backup JSON
                         </button>
                       </div>
                     </div>
