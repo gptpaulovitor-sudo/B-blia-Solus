@@ -347,13 +347,24 @@ export default function BackupSyncModal({ isOpen, onClose, initialTab = 'cloud' 
                   </div>
 
                   {syncStatusNuvem === 'error' && (
-                    <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
-                      <div className="flex items-center gap-1.5 font-bold">
-                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                        <span>Sincronização em Nuvem: Firestore Bloqueado</span>
+                    <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2.5">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                          <span>Status da Nuvem: Pendente</span>
+                        </div>
+                        <button
+                          onClick={() => sincronizarComNuvem({}, true)}
+                          disabled={syncStatusNuvem === 'syncing'}
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-md"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${syncStatusNuvem === 'syncing' ? 'animate-spin' : ''}`} />
+                          <span>🔄 Tocar Aqui para Sincronizar Agora</span>
+                        </button>
                       </div>
+
                       <p className="text-[11px] leading-relaxed">
-                        Sua conta Google está autenticada, mas o banco de dados Cloud Firestore retornou <strong>permissão negada</strong> para gravação no projeto <code className="bg-amber-200/60 dark:bg-amber-900/60 px-1 py-0.5 rounded">biblia-online-8bce0</code>.
+                        Se você acabou de salvar as regras no Firebase, toque no botão verde acima para confirmar a conexão com a nuvem!
                       </p>
                       <div className="p-2.5 rounded-xl bg-white/70 dark:bg-stone-900/60 border border-amber-200 dark:border-amber-900 text-[11px] space-y-1">
                         <p className="font-bold text-amber-950 dark:text-amber-300">Como liberar a nuvem definitivamente:</p>
