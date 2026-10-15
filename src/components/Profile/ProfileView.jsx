@@ -18,7 +18,8 @@ import {
   ChevronUp,
   Award,
   BarChart3,
-  HardDrive
+  HardDrive,
+  Cloud
 } from 'lucide-react';
 import { formatarIntervalosVersiculos } from '../../utils/bibleHelpers';
 import BackupSyncModal from '../Common/BackupSyncModal';
@@ -34,7 +35,9 @@ export default function ProfileView() {
     planoAtivo,
     setActiveTab,
     ofensivaDias,
-    setSelectedVerseModal
+    setSelectedVerseModal,
+    usuarioGoogle,
+    syncStatusNuvem
   } = useApp();
 
   const [activeFilterColor, setActiveFilterColor] = useState('all'); // all | yellow | green | blue | pink | notes
@@ -187,26 +190,66 @@ export default function ProfileView() {
       {/* Header Profile Banner */}
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-[#FFFFFF] dark:bg-[#18181D] rounded-3xl p-6 md:p-8 border border-[#E8E2D5] dark:border-[#2C271E] shadow-xs">
         <div class="flex items-center gap-4">
-          <div class="w-16 h-16 rounded-3xl bg-[#9E7418] dark:bg-[#D4AF37] flex items-center justify-center text-white text-2xl font-bold shadow-lg shrink-0">
-            <User class="w-8 h-8 text-[#F6F4EE]" />
-          </div>
+          {usuarioGoogle?.foto ? (
+            <img 
+              src={usuarioGoogle.foto} 
+              alt={usuarioGoogle.nome} 
+              className="w-16 h-16 rounded-3xl object-cover shadow-lg shrink-0 border-2 border-emerald-500" 
+            />
+          ) : (
+            <div class="w-16 h-16 rounded-3xl bg-[#9E7418] dark:bg-[#D4AF37] flex items-center justify-center text-white text-2xl font-bold shadow-lg shrink-0">
+              <User class="w-8 h-8 text-[#F6F4EE]" />
+            </div>
+          )}
           <div>
-            <span class="text-xs font-bold text-[#9E7418] dark:text-[#D4AF37] uppercase tracking-widest">
-              Solus Christus • Módulo de Disciplina
-            </span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold text-[#9E7418] dark:text-[#D4AF37] uppercase tracking-widest">
+                Solus Christus • Módulo de Disciplina
+              </span>
+              {usuarioGoogle && (
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Google Sincronizado</span>
+                </span>
+              )}
+            </div>
             <h1 class="font-cinzel font-black text-2xl md:text-3xl text-[#1F1C18] dark:text-[#F6F4EE] tracking-tight mt-0.5">
-              Disciplina (Caderno & Medidores)
+              {usuarioGoogle ? usuarioGoogle.nome : 'Disciplina (Caderno & Medidores)'}
             </h1>
             <p class="text-xs md:text-sm text-[#6B6357] dark:text-[#A39D90] mt-0.5 font-sans">
-              Medidores de leitura, progresso dos planos, destaques e anotações de estudo profundo & prática diária.
+              {usuarioGoogle 
+                ? `${usuarioGoogle.email} • Progresso salvo e sincronizado na nuvem do Google.` 
+                : 'Medidores de leitura, progresso dos planos, destaques e anotações de estudo profundo & prática diária.'}
             </p>
             <div class="mt-3 flex items-center gap-2 flex-wrap">
+              {usuarioGoogle ? (
+                <button
+                  onClick={() => setIsBackupModalOpen(true)}
+                  class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
+                >
+                  <Cloud class="w-3.5 h-3.5" />
+                  <span>Gerenciar Conta Google & Nuvem</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsBackupModalOpen(true)}
+                  class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#9E7418] dark:bg-[#D4AF37] hover:opacity-95 text-white font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  <span>Vincular com Conta Google</span>
+                </button>
+              )}
               <button
                 onClick={() => setIsBackupModalOpen(true)}
-                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#9E7418] dark:bg-[#D4AF37] hover:opacity-95 text-white font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 <HardDrive class="w-3.5 h-3.5" />
-                <span>Sincronização & Backup</span>
+                <span>Backup JSON</span>
               </button>
               <a
                 href="#caderno-de-anotacoes"

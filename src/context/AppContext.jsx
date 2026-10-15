@@ -4,6 +4,18 @@ import { getCapituloVersiculos, LIVROS_BIBLIA } from '../data/bibliaACF';
 import { getComentarioCapitulo } from '../data/comentariosEstudo';
 import { calcularPlanoPersonalizado } from '../services/planCalculator';
 import { nativeService } from '../services/nativeService';
+import {
+  subscribeAuthState,
+  loginWithGoogle,
+  loginWithEmail,
+  registerWithEmail,
+  logoutFirebase,
+  saveUserDataToFirestore,
+  loadUserDataFromFirestore,
+  mergeUserData,
+  getActiveFirebaseConfig,
+  saveActiveFirebaseConfig
+} from '../services/firebaseService';
 
 const AppContext = createContext();
 
@@ -37,6 +49,10 @@ export function AppProvider({ children }) {
 
   // Notificações Toast
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Usuário e sincronização em Nuvem (Google Firebase)
+  const [usuarioGoogle, setUsuarioGoogle] = useState(null);
+  const [syncStatusNuvem, setSyncStatusNuvem] = useState('idle'); // 'idle' | 'syncing' | 'synced' | 'error'
 
   // Inicializar serviços nativos do dispositivo (Botão Voltar, Splash Screen)
   useEffect(() => {
@@ -259,6 +275,7 @@ export function AppProvider({ children }) {
         showToast(`Capítulo de ${livroNome} ${capNum} desmarcado.`);
       }
     }
+    sincronizarComNuvem({ progressoCapitulos: novoProgresso });
   };
 
   // Salvar / atualizar destaque ou nota de um versículo
@@ -324,6 +341,7 @@ export function AppProvider({ children }) {
 
     setVersiculosMarcados(atualizados);
     storageService.saveVersiculosMarcados(atualizados);
+    sincronizarComNuvem({ versiculosMarcados: atualizados });
     setSelectedVerseModal(null);
   };
 
@@ -350,6 +368,7 @@ export function AppProvider({ children }) {
 
     setVersiculosMarcados(atualizados);
     storageService.saveVersiculosMarcados(atualizados);
+    sincronizarComNuvem({ versiculosMarcados: atualizados });
     showToast(versiculosParaRemover.size > 1 ? 'Anotações dos versículos removidas' : 'Marcação removida');
   };
 
@@ -494,6 +513,114 @@ export function AppProvider({ children }) {
     return recuperou;
   };
 
+  // Observador de Autenticação Firebase (Nuvem Google)
+  useEffect(() => {
+    const unsub = subscribeAuthState(async (user) => {
+      setUsuarioGoogle(user);
+      if (user) {
+        setSyncStatusNuvem('syncing');
+        try {
+          const cloudData = await loadUserDataFromFirestore(user.uid);
+          if (cloudData) {
+            const localData = {
+              progressoCapitulos: storageService.getProgressoCapitulos(),
+              versiculosMarcados: storageService.getVersiculosMarcados(),
+              planoAtivo: storageService.getPlanoAtivo(),
+              ofensivaDias: storageService.getOfensivaDias()
+            };
+            const merged = mergeUserData(localData, cloudData);
+
+            storageService.saveProgressoCapitulos(merged.progressoCapitulos);
+            storageService.saveVersiculosMarcados(merged.versiculosMarcados);
+            if (merged.planoAtivo) storageService.savePlanoAtivo(merged.planoAtivo);
+            storageService.saveOfensivaDias(merged.ofensivaDias);
+
+            await saveUserDataToFirestore(user.uid, merged);
+
+            setProgressoCapitulos(merged.progressoCapitulos);
+            setVersiculosMarcados(merged.versiculosMarcados);
+            if (merged.planoAtivo) setPlanoAtivo(merged.planoAtivo);
+          } else {
+            const localData = {
+              progressoCapitulos: storageService.getProgressoCapitulos(),
+              versiculosMarcados: storageService.getVersiculosMarcados(),
+              planoAtivo: storageService.getPlanoAtivo(),
+              ofensivaDias: storageService.getOfensivaDias()
+            };
+            await saveUserDataToFirestore(user.uid, localData);
+          }
+          setSyncStatusNuvem('synced');
+        } catch (e) {
+          console.error('Erro na sincronização inicial do Firebase:', e);
+          setSyncStatusNuvem('error');
+        }
+      } else {
+        setSyncStatusNuvem('idle');
+      }
+    });
+
+    return () => unsub && unsub();
+  }, []);
+
+  // Enviar alterações para a nuvem automaticamente quando o usuário estiver logado
+  const sincronizarComNuvem = async (dadosExtras = {}) => {
+    if (!usuarioGoogle?.uid) return;
+    setSyncStatusNuvem('syncing');
+    try {
+      const payload = {
+        progressoCapitulos: storageService.getProgressoCapitulos(),
+        versiculosMarcados: storageService.getVersiculosMarcados(),
+        planoAtivo: storageService.getPlanoAtivo(),
+        ofensivaDias: storageService.getOfensivaDias(),
+        ...dadosExtras
+      };
+      await saveUserDataToFirestore(usuarioGoogle.uid, payload);
+      setSyncStatusNuvem('synced');
+    } catch (e) {
+      console.error('Erro ao sincronizar com nuvem:', e);
+      setSyncStatusNuvem('error');
+    }
+  };
+
+  const loginGoogle = async () => {
+    try {
+      const user = await loginWithGoogle();
+      showToast(`Conectado como ${user.displayName || user.email}!`);
+      return true;
+    } catch (err) {
+      console.error(err);
+      showToast(`Erro ao entrar com Google: ${err.message || 'Falha na autenticação'}`);
+      return false;
+    }
+  };
+
+  const loginEmail = async (email, password, isSignUp = false, nome = '') => {
+    try {
+      if (isSignUp) {
+        await registerWithEmail(email, password, nome);
+        showToast('Conta criada com sucesso e sincronizada!');
+      } else {
+        await loginWithEmail(email, password);
+        showToast('Login realizado com sucesso!');
+      }
+      return true;
+    } catch (err) {
+      console.error(err);
+      showToast(`Erro de autenticação: ${err.message || 'Falha'}`);
+      return false;
+    }
+  };
+
+  const logoutGoogle = async () => {
+    try {
+      await logoutFirebase();
+      showToast('Sessão encerrada.');
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao sair da conta.');
+    }
+  };
+
   // Obter versículos do capítulo atual
   const versiculosAtuais = getCapituloVersiculos(posicao.livroId, posicao.capitulo);
   const comentarioAtual = getComentarioCapitulo(posicao.livroId, posicao.capitulo);
@@ -535,7 +662,15 @@ export function AppProvider({ children }) {
         exportarBackup,
         importarBackup,
         recuperarDadosLegados,
-        recarregarTudoDoStorage
+        recarregarTudoDoStorage,
+        usuarioGoogle,
+        syncStatusNuvem,
+        loginGoogle,
+        loginEmail,
+        logoutGoogle,
+        sincronizarComNuvem,
+        getActiveFirebaseConfig,
+        saveActiveFirebaseConfig
       }}
     >
       {children}
